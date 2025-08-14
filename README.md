@@ -13,7 +13,7 @@
 - 🔔 **Price alerts** and notifications
 - 🧮 **Currency calculator** and converter
 - 🌙 **Dark/light theme** support
-- 📱 **PWA support** for mobile installation
+- 📱 **Responsive design** for all devices
 
 ## 🚀 Tech Stack
 
@@ -23,10 +23,9 @@
 - **APIs**: CoinGecko, RSS2JSON
 - **Deployment**: GitHub Pages
 
-## 📱 Installation
+## 📱 Usage
 
-1. **Web**: Visit [Live Demo](https://s2n4ster.github.io/currencycheck/)
-2. **Mobile**: Install as PWA from browser menu
+Simply visit [Live Demo](https://s2n4ster.github.io/currencycheck/) in any modern web browser
 
 ## 🔧 Development
 
