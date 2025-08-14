@@ -20,6 +20,8 @@ class CurrencyDashboard {
         this.currentFilter = 'all'; // 'all' или 'favorites'
         this.updateInterval = null;
         this.chart = null;
+        this.currentCurrency = null;
+        this.currentTimeframe = { days: 7, interval: 'daily' };
         
         // Список отслеживаемых валют и криптовалют
         this.currencyList = [
@@ -84,6 +86,14 @@ class CurrencyDashboard {
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 this.closeChart();
+            }
+        });
+        
+        // Обработчики кнопок временных промежутков
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('timeframe-btn') || e.target.closest('.timeframe-btn')) {
+                const btn = e.target.classList.contains('timeframe-btn') ? e.target : e.target.closest('.timeframe-btn');
+                this.setTimeframe(btn);
             }
         });
     }
@@ -364,16 +374,69 @@ class CurrencyDashboard {
     // Показ графика
     async showChart(currencyId, currencyName) {
         try {
+            this.currentCurrency = { id: currencyId, name: currencyName };
+            
             const modal = document.getElementById('chart-modal');
             const title = document.getElementById('chart-title');
             
-            title.textContent = `${currencyName} - График за 7 дней`;
+            // Сброс к первому временному промежутку
+            this.currentTimeframe = { days: 1, interval: 'hourly' };
+            this.updateTimeframeButtons();
+            
+            title.textContent = `${currencyName} - График цены`;
             modal.classList.remove('hidden');
             modal.classList.add('modal-backdrop');
             
-            // Получаем исторические данные
+            // Загружаем данные для текущего временного промежутка
+            await this.loadChartData();
+            
+        } catch (error) {
+            console.error('Ошибка при загрузке графика:', error);
+            alert('Не удалось загрузить график. Попробуйте позже.');
+            this.closeChart();
+        }
+    }
+    
+    // Установка временного промежутка
+    async setTimeframe(button) {
+        const days = parseInt(button.dataset.days);
+        const interval = button.dataset.interval;
+        
+        this.currentTimeframe = { days, interval };
+        this.updateTimeframeButtons();
+        
+        if (this.currentCurrency) {
+            await this.loadChartData();
+        }
+    }
+    
+    // Обновление состояния кнопок временных промежутков
+    updateTimeframeButtons() {
+        document.querySelectorAll('.timeframe-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (parseInt(btn.dataset.days) === this.currentTimeframe.days) {
+                btn.classList.add('active');
+            }
+        });
+    }
+    
+    // Загрузка данных графика
+    async loadChartData() {
+        try {
+            this.showChartLoading(true);
+            
+            // Определяем интервал на основе временного промежутка
+            let interval = this.currentTimeframe.interval;
+            if (this.currentTimeframe.days === 1) {
+                interval = 'hourly';
+            } else if (this.currentTimeframe.days <= 30) {
+                interval = 'daily';
+            } else {
+                interval = 'daily';
+            }
+            
             const response = await fetch(
-                `${this.COINGECKO_API}/coins/${currencyId}/market_chart?vs_currency=usd&days=7&interval=daily`
+                `${this.COINGECKO_API}/coins/${this.currentCurrency.id}/market_chart?vs_currency=usd&days=${this.currentTimeframe.days}&interval=${interval}`
             );
             
             if (!response.ok) {
@@ -381,13 +444,43 @@ class CurrencyDashboard {
             }
             
             const data = await response.json();
-            this.renderChart(data.prices, currencyName);
+            this.renderChart(data.prices, this.currentCurrency.name);
             
         } catch (error) {
-            console.error('Ошибка при загрузке графика:', error);
-            alert('Не удалось загрузить график. Попробуйте позже.');
-            this.closeChart();
+            console.error('Ошибка при загрузке данных графика:', error);
+            this.showChartError('Не удалось загрузить данные графика');
+        } finally {
+            this.showChartLoading(false);
         }
+    }
+    
+    // Показ/скрытие индикатора загрузки графика
+    showChartLoading(show) {
+        const loading = document.getElementById('chart-loading');
+        const chartCanvas = document.querySelector('#price-chart').parentElement;
+        
+        if (show) {
+            loading.classList.remove('hidden');
+            chartCanvas.style.opacity = '0.3';
+        } else {
+            loading.classList.add('hidden');
+            chartCanvas.style.opacity = '1';
+        }
+    }
+    
+    // Показ ошибки графика
+    showChartError(message) {
+        const canvas = document.getElementById('price-chart');
+        const ctx = canvas.getContext('2d');
+        
+        // Очищаем canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Показываем сообщение об ошибке
+        ctx.fillStyle = '#ef4444';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(message, canvas.width / 2, canvas.height / 2);
     }
     
     // Отрисовка графика
@@ -399,9 +492,29 @@ class CurrencyDashboard {
             this.chart.destroy();
         }
         
+        // Форматируем метки в зависимости от временного промежутка
         const labels = priceData.map(point => {
             const date = new Date(point[0]);
-            return date.toLocaleDateString('ru-RU', { month: 'short', day: 'numeric' });
+            
+            if (this.currentTimeframe.days === 1) {
+                // Для 24 часов показываем время
+                return date.toLocaleTimeString('ru-RU', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+            } else if (this.currentTimeframe.days <= 30) {
+                // Для месяца показываем день и месяц
+                return date.toLocaleDateString('ru-RU', { 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+            } else {
+                // Для длительных периодов показываем месяц и год
+                return date.toLocaleDateString('ru-RU', { 
+                    month: 'short', 
+                    year: '2-digit' 
+                });
+            }
         });
         
         const prices = priceData.map(point => point[1]);
@@ -410,6 +523,7 @@ class CurrencyDashboard {
         const firstPrice = prices[0];
         const lastPrice = prices[prices.length - 1];
         const isPositive = lastPrice > firstPrice;
+        const changePercent = ((lastPrice - firstPrice) / firstPrice * 100).toFixed(2);
         
         const lineColor = isPositive ? '#10b981' : '#ef4444';
         const gradientColor = isPositive ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)';
@@ -418,6 +532,10 @@ class CurrencyDashboard {
         const gradient = ctx.createLinearGradient(0, 0, 0, 400);
         gradient.addColorStop(0, gradientColor);
         gradient.addColorStop(1, 'transparent');
+        
+        // Настраиваем размер точек в зависимости от количества данных
+        const pointRadius = priceData.length > 100 ? 0 : priceData.length > 50 ? 1 : 2;
+        const pointHoverRadius = pointRadius + 2;
         
         this.chart = new Chart(ctx, {
             type: 'line',
@@ -430,12 +548,12 @@ class CurrencyDashboard {
                     backgroundColor: gradient,
                     borderWidth: 2,
                     fill: true,
-                    tension: 0.4,
+                    tension: 0.1,
                     pointBackgroundColor: lineColor,
                     pointBorderColor: '#ffffff',
-                    pointBorderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6
+                    pointBorderWidth: 1,
+                    pointRadius: pointRadius,
+                    pointHoverRadius: pointHoverRadius
                 }]
             },
             options: {
@@ -444,25 +562,51 @@ class CurrencyDashboard {
                 plugins: {
                     legend: {
                         display: false
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        borderColor: lineColor,
+                        borderWidth: 1,
+                        callbacks: {
+                            label: function(context) {
+                                return `$${context.parsed.y.toLocaleString('en-US', {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 6
+                                })}`;
+                            }
+                        }
                     }
                 },
                 scales: {
                     x: {
                         grid: {
-                            color: 'rgba(107, 114, 128, 0.1)'
+                            color: 'rgba(107, 114, 128, 0.1)',
+                            drawBorder: false
                         },
                         ticks: {
-                            color: '#6b7280'
+                            color: '#6b7280',
+                            maxTicksLimit: 10
                         }
                     },
                     y: {
                         grid: {
-                            color: 'rgba(107, 114, 128, 0.1)'
+                            color: 'rgba(107, 114, 128, 0.1)',
+                            drawBorder: false
                         },
                         ticks: {
                             color: '#6b7280',
                             callback: function(value) {
-                                return '$' + value.toLocaleString();
+                                if (value >= 1000) {
+                                    return '$' + (value / 1000).toFixed(1) + 'K';
+                                } else if (value >= 1) {
+                                    return '$' + value.toFixed(2);
+                                } else {
+                                    return '$' + value.toFixed(6);
+                                }
                             }
                         }
                     }
@@ -473,6 +617,49 @@ class CurrencyDashboard {
                 }
             }
         });
+        
+        // Обновляем информацию о графике
+        this.updateChartInfo(priceData, changePercent, isPositive);
+    }
+    
+    // Обновление информации о графике
+    updateChartInfo(priceData, changePercent, isPositive) {
+        const periodElement = document.getElementById('chart-period');
+        const dataPointsElement = document.getElementById('chart-data-points');
+        
+        // Определяем название периода
+        let periodName = '';
+        switch (this.currentTimeframe.days) {
+            case 1:
+                periodName = '24 часа';
+                break;
+            case 7:
+                periodName = '7 дней';
+                break;
+            case 30:
+                periodName = '30 дней';
+                break;
+            case 90:
+                periodName = '90 дней';
+                break;
+            case 365:
+                periodName = '1 год';
+                break;
+            default:
+                periodName = `${this.currentTimeframe.days} дней`;
+        }
+        
+        const changeColor = isPositive ? '#10b981' : '#ef4444';
+        const changeIcon = isPositive ? '↗' : '↘';
+        
+        periodElement.innerHTML = `
+            <span>Период: ${periodName}</span>
+            <span style="color: ${changeColor}; margin-left: 1rem;">
+                ${changeIcon} ${Math.abs(changePercent)}%
+            </span>
+        `;
+        
+        dataPointsElement.textContent = `Точек данных: ${priceData.length}`;
     }
     
     // Закрытие графика
@@ -485,6 +672,12 @@ class CurrencyDashboard {
             this.chart.destroy();
             this.chart = null;
         }
+        
+        // Сбрасываем текущую валюту
+        this.currentCurrency = null;
+        
+        // Скрываем индикатор загрузки
+        this.showChartLoading(false);
     }
     
     // Запуск автообновления

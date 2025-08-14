@@ -276,3 +276,92 @@
     color: #ef4444;
     border: 1px solid rgba(239, 68, 68, 0.2);
 }
+
+/* Стили для кнопок выбора временных промежутков */
+.timeframe-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #d1d5db;
+    background-color: #f9fafb;
+    color: #374151;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.dark .timeframe-btn {
+    border-color: #4b5563;
+    background-color: #374151;
+    color: #d1d5db;
+}
+
+.timeframe-btn:hover {
+    background-color: #f3f4f6;
+    border-color: #9ca3af;
+    transform: translateY(-1px);
+}
+
+.dark .timeframe-btn:hover {
+    background-color: #4b5563;
+    border-color: #6b7280;
+}
+
+.timeframe-btn.active {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+    color: white;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.timeframe-btn.active:hover {
+    background-color: #2563eb;
+    border-color: #2563eb;
+    transform: translateY(-1px);
+}
+
+.timeframe-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Улучшенная анимация загрузки для графиков */
+.chart-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 0.5rem;
+}
+
+.dark .chart-loading-overlay {
+    background-color: rgba(31, 41, 55, 0.9);
+}
+
+/* Стили для информации о графике */
+#chart-info {
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+}
+
+/* Анимация для переключения графиков */
+.chart-transition {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.chart-fade-out {
+    opacity: 0;
+}
+
+.chart-fade-in {
+    opacity: 1;
+}

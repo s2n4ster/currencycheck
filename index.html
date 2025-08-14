@@ -99,16 +99,65 @@
 
             <!-- Chart Modal -->
             <div id="chart-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-                <div class="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
+                <div class="bg-white dark:bg-gray-800 rounded-lg max-w-6xl w-full max-h-[95vh] overflow-hidden">
                     <div class="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
                         <h3 id="chart-title" class="text-lg font-semibold text-gray-900 dark:text-white"></h3>
                         <button id="close-chart" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                             <i class="fas fa-times text-gray-600 dark:text-gray-400"></i>
                         </button>
                     </div>
+                    
+                    <!-- Timeframe Selection -->
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <div class="flex flex-wrap gap-2">
+                            <button class="timeframe-btn active" data-days="1" data-interval="hourly">
+                                <i class="fas fa-clock mr-1"></i>
+                                24 часа
+                            </button>
+                            <button class="timeframe-btn" data-days="7" data-interval="daily">
+                                <i class="fas fa-calendar-week mr-1"></i>
+                                7 дней
+                            </button>
+                            <button class="timeframe-btn" data-days="30" data-interval="daily">
+                                <i class="fas fa-calendar-alt mr-1"></i>
+                                30 дней
+                            </button>
+                            <button class="timeframe-btn" data-days="90" data-interval="daily">
+                                <i class="fas fa-calendar mr-1"></i>
+                                90 дней
+                            </button>
+                            <button class="timeframe-btn" data-days="365" data-interval="daily">
+                                <i class="fas fa-calendar-check mr-1"></i>
+                                1 год
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Chart Container -->
                     <div class="p-6">
-                        <div class="relative h-80">
+                        <!-- Loading indicator for chart -->
+                        <div id="chart-loading" class="hidden flex justify-center items-center h-96">
+                            <div class="loading-dots">
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Chart canvas -->
+                        <div class="relative h-96">
                             <canvas id="price-chart"></canvas>
+                        </div>
+                        
+                        <!-- Chart info -->
+                        <div id="chart-info" class="mt-4 flex justify-between items-center text-sm text-gray-600 dark:text-gray-400">
+                            <div>
+                                <span id="chart-period"></span>
+                            </div>
+                            <div>
+                                <span id="chart-data-points"></span>
+                            </div>
                         </div>
                     </div>
                 </div>
