@@ -463,9 +463,11 @@ class CurrencyDashboard {
                 const changeElement = cardElement.querySelector('.currency-change');
                 
                 if (priceElement) {
-                    priceElement.textContent = currency.type === 'crypto' 
-                        ? '$' + this.formatPrice(currency.price)
-                        : currency.price.toFixed(4);
+                    const formattedPrice = currency.type === 'crypto' 
+                        ? '$' + this.formatPrice(currency.price || 0)
+                        : (currency.price || 0).toFixed(4);
+                    priceElement.textContent = formattedPrice;
+                    console.log(`Updated ${currency.symbol}: ${formattedPrice}`);
                 }
                 
                 if (changeElement && currency.change24h !== 0) {
@@ -617,7 +619,11 @@ class CurrencyDashboard {
                 
                 <div class="mb-4">
                     <div class="currency-price text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                        ${currency.type === 'crypto' ? '$' + this.formatPrice(currency.price) : currency.price.toFixed(4)}
+                        ${(() => {
+                            const formattedPrice = currency.type === 'crypto' ? '$' + this.formatPrice(currency.price || 0) : (currency.price || 0).toFixed(4);
+                            console.log(`Rendering ${currency.symbol}: ${formattedPrice}, type: ${currency.type}, price: ${currency.price}`);
+                            return formattedPrice;
+                        })()}
                     </div>
                     ${currency.change24h !== 0 ? `
                         <div class="currency-change flex items-center ${priceChangeClass} px-2 py-1 rounded-full text-sm font-medium">
