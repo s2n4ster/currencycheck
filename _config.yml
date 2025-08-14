@@ -1,0 +1,38 @@
+# GitHub Pages configuration
+title: Live Currency Dashboard
+description: A modern web application for tracking cryptocurrency and fiat currency rates in real-time
+baseurl: "/currencycheck"
+url: "https://s2n4ster.github.io"
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+
+# Exclude files from processing
+exclude:
+  - README.md
+  - LICENSE
+  - .gitignore
+  - clean_currency_dashboard.tar.gz
+
+# Include files that start with underscore
+include:
+  - _config.yml
+
+# Plugins
+plugins:
+  - jekyll-sitemap
+  - jekyll-feed
+
+# Theme
+theme: minima
+
+# SEO
+lang: ru
+author: Developer
+twitter:
+  username: s2n4ster
+  card: summary
+
+# Social links
+github_username: s2n4ster
