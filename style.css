@@ -1,0 +1,1137 @@
+/**
+ * Live Currency Dashboard - Custom Styles
+ * Enhanced animations and UI components
+ * 
+ * @author Developer
+ * @version 1.0.0
+ */
+
+/* Улучшенные анимации для карточек валют */
+.currency-card {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(0) scale(1);
+    position: relative;
+    overflow: hidden;
+}
+
+.currency-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s;
+    z-index: 1;
+}
+
+.currency-card:hover::before {
+    left: 100%;
+}
+
+.currency-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15), 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.dark .currency-card:hover {
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4), 0 10px 20px -5px rgba(0, 0, 0, 0.2);
+    border-color: rgba(59, 130, 246, 0.5);
+}
+
+/* Анимация обновления карточки */
+.currency-card.updating {
+    animation: cardUpdate 1s ease-in-out;
+    position: relative;
+}
+
+.currency-card.updating::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(59, 130, 246, 0.1) 50%, transparent 70%);
+    animation: updateSweep 1s ease-in-out;
+    z-index: 1;
+    pointer-events: none;
+}
+
+@keyframes cardUpdate {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes updateSweep {
+    0% {
+        transform: translateX(-100%) skewX(-20deg);
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(100%) skewX(-20deg);
+        opacity: 0;
+    }
+}
+
+/* Анимация пульсации для обновления данных */
+.pulse-update {
+    animation: pulse-glow 0.6s ease-in-out;
+}
+
+@keyframes pulse-glow {
+    0% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+    }
+}
+
+/* Стили для цветовой индикации изменения цены */
+.price-up {
+    color: #10b981;
+    background-color: rgba(16, 185, 129, 0.1);
+}
+
+.price-down {
+    color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+.price-neutral {
+    color: #6b7280;
+    background-color: rgba(107, 114, 128, 0.1);
+}
+
+/* Анимация для звездочки избранного */
+.favorite-star {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.favorite-star:hover {
+    transform: scale(1.1);
+}
+
+.favorite-star.active {
+    color: #fbbf24;
+    text-shadow: 0 0 8px rgba(251, 191, 36, 0.3);
+}
+
+/* Кастомный скроллбар */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.dark ::-webkit-scrollbar-track {
+    background: #1e293b;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: #475569;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+/* Анимация появления карточек */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Стили для модального окна графика */
+.modal-backdrop {
+    backdrop-filter: blur(4px);
+}
+
+/* Анимация загрузки */
+.loading-dots {
+    display: inline-block;
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.loading-dots div {
+    position: absolute;
+    top: 33px;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: #3b82f6;
+    animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+
+.loading-dots div:nth-child(1) {
+    left: 8px;
+    animation: loading1 0.6s infinite;
+}
+
+.loading-dots div:nth-child(2) {
+    left: 8px;
+    animation: loading2 0.6s infinite;
+}
+
+.loading-dots div:nth-child(3) {
+    left: 32px;
+    animation: loading2 0.6s infinite;
+}
+
+.loading-dots div:nth-child(4) {
+    left: 56px;
+    animation: loading3 0.6s infinite;
+}
+
+@keyframes loading1 {
+    0% {
+        transform: scale(0);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes loading3 {
+    0% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(0);
+    }
+}
+
+@keyframes loading2 {
+    0% {
+        transform: translate(0, 0);
+    }
+    100% {
+        transform: translate(24px, 0);
+    }
+}
+
+/* Адаптивные улучшения */
+@media (max-width: 640px) {
+    .currency-card {
+        margin-bottom: 1rem;
+    }
+    
+    /* Увеличиваем размер кнопок на мобильных */
+    .favorite-star {
+        padding: 0.5rem;
+        font-size: 1.125rem;
+    }
+    
+    /* Улучшаем читаемость текста на мобильных */
+    .currency-name {
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    
+    .currency-price {
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+}
+
+/* Стили для состояния загрузки карточек */
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading-skeleton 1.5s infinite;
+}
+
+.dark .skeleton {
+    background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+    background-size: 200% 100%;
+}
+
+@keyframes loading-skeleton {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Улучшения для кнопок фильтрации */
+.filter-button {
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.filter-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.filter-button:hover::before {
+    left: 100%;
+}
+
+/* Стили для индикатора статуса подключения */
+.connection-status {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.connection-online {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.connection-offline {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* Стили для кнопок выбора временных промежутков */
+.timeframe-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #d1d5db;
+    background-color: #f9fafb;
+    color: #374151;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.dark .timeframe-btn {
+    border-color: #4b5563;
+    background-color: #374151;
+    color: #d1d5db;
+}
+
+.timeframe-btn:hover {
+    background-color: #f3f4f6;
+    border-color: #9ca3af;
+    transform: translateY(-1px);
+}
+
+.dark .timeframe-btn:hover {
+    background-color: #4b5563;
+    border-color: #6b7280;
+}
+
+.timeframe-btn.active {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+    color: white;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.timeframe-btn.active:hover {
+    background-color: #2563eb;
+    border-color: #2563eb;
+    transform: translateY(-1px);
+}
+
+.timeframe-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Улучшенная анимация загрузки для графиков */
+.chart-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 0.5rem;
+}
+
+.dark .chart-loading-overlay {
+    background-color: rgba(31, 41, 55, 0.9);
+}
+
+/* Стили для информации о графике */
+#chart-info {
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+}
+
+/* Анимация для переключения графиков */
+.chart-transition {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.chart-fade-out {
+    opacity: 0;
+}
+
+.chart-fade-in {
+    opacity: 1;
+}
+
+/* Стили для поиска */
+#search-input:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Стили для уведомлений */
+.notification {
+    min-width: 300px;
+    max-width: 400px;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    transform: translateX(100%);
+    transition: all 0.3s ease;
+    border-left: 4px solid;
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification.success {
+    background-color: #d1fae5;
+    color: #065f46;
+    border-left-color: #10b981;
+}
+
+.notification.error {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border-left-color: #ef4444;
+}
+
+.notification.info {
+    background-color: #dbeafe;
+    color: #1e40af;
+    border-left-color: #3b82f6;
+}
+
+.dark .notification.success {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #34d399;
+}
+
+.dark .notification.error {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+}
+
+.dark .notification.info {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #60a5fa;
+}
+
+/* Улучшенные стили для статистики */
+.stat-card {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 0deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+    opacity: 0;
+    transition: all 0.5s ease;
+    animation: statRotate 3s linear infinite;
+}
+
+.stat-card:hover::before {
+    opacity: 1;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15), 0 6px 20px rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.dark .stat-card:hover {
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 6px 20px rgba(59, 130, 246, 0.2);
+}
+
+.stat-card.updating {
+    animation: statPulse 0.8s ease-in-out;
+}
+
+@keyframes statRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes statPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+    }
+}
+
+/* Улучшенная анимация синхронизации */
+.sync-spin {
+    animation: syncRotate 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+    transform-origin: center;
+}
+
+.sync-pulse {
+    animation: syncPulse 2s ease-in-out infinite;
+}
+
+.sync-ring-active {
+    opacity: 0.6 !important;
+    animation: syncRing 1.5s ease-out infinite;
+}
+
+@keyframes syncRotate {
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+    50% {
+        transform: rotate(180deg) scale(1.1);
+        color: #10b981;
+    }
+    100% {
+        transform: rotate(360deg) scale(1);
+    }
+}
+
+@keyframes syncPulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.05);
+    }
+}
+
+@keyframes syncRing {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+/* Анимация shimmer для прогресс-бара */
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.animate-shimmer {
+    animation: shimmer 2s infinite;
+}
+
+/* Стили для портфеля */
+.portfolio-item {
+    transition: all 0.3s ease;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    background-color: #ffffff;
+}
+
+.dark .portfolio-item {
+    border-color: #4b5563;
+    background-color: #1f2937;
+}
+
+.portfolio-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dark .portfolio-item:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Стили для калькулятора */
+.calculator-swap {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.calculator-swap:hover {
+    transform: rotate(180deg);
+    color: #3b82f6;
+}
+
+/* Стили для звуковой кнопки */
+#sound-toggle {
+    transition: all 0.3s ease;
+}
+
+#sound-toggle:hover {
+    transform: scale(1.1);
+}
+
+#sound-toggle.muted {
+    background-color: #6b7280;
+}
+
+#sound-toggle.muted:hover {
+    background-color: #4b5563;
+}
+
+/* Стили для экспорта данных */
+.export-format {
+    padding: 0.75rem 1rem;
+    border: 2px solid transparent;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.export-format:hover {
+    border-color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.05);
+}
+
+.export-format.selected {
+    border-color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.dark .export-format:hover {
+    background-color: rgba(59, 130, 246, 0.1);
+}
+
+.dark .export-format.selected {
+    background-color: rgba(59, 130, 246, 0.2);
+}
+
+/* Стили для анимации появления элементов */
+.slide-up {
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Стили для прогресс бара */
+.progress-bar {
+    height: 4px;
+    background-color: #e5e7eb;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.dark .progress-bar {
+    background-color: #374151;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #10b981);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+/* Стили для тултипов */
+.tooltip {
+    position: relative;
+}
+
+.tooltip::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #1f2937;
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    z-index: 1000;
+}
+
+.tooltip:hover::before {
+    opacity: 1;
+    visibility: visible;
+    bottom: calc(100% + 5px);
+}
+
+/* ===== TAB SYSTEM STYLES ===== */
+
+/* Tab Navigation */
+#main-tabs {
+    position: relative;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+#main-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+/* Tab Buttons */
+.tab-btn {
+    position: relative;
+    background: transparent;
+    color: #6b7280;
+    border: 2px solid transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.tab-btn:hover {
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.05);
+    border-color: rgba(59, 130, 246, 0.1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.tab-btn.active {
+    color: #3b82f6;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
+    border-color: #3b82f6;
+    font-weight: 600;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.25);
+}
+
+.dark .tab-btn {
+    color: #9ca3af;
+}
+
+.dark .tab-btn:hover {
+    color: #60a5fa;
+    background: rgba(96, 165, 250, 0.1);
+    border-color: rgba(96, 165, 250, 0.2);
+}
+
+.dark .tab-btn.active {
+    color: #60a5fa;
+    background: linear-gradient(135deg, rgba(96, 165, 250, 0.15), rgba(168, 85, 247, 0.15));
+    border-color: #60a5fa;
+}
+
+/* Tab Indicator */
+.tab-indicator {
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    width: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    border-radius: 2px;
+    transform: translateX(-50%);
+    transition: width 0.3s ease;
+}
+
+.tab-btn.active .tab-indicator {
+    width: 80%;
+}
+
+/* Tab Content */
+.tab-content {
+    display: none;
+    opacity: 0;
+    transform: translateX(0);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    position: relative;
+    will-change: opacity, transform;
+    contain: layout style paint;
+}
+
+.tab-content.active {
+    display: block;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Prevent layout shifts during tab transitions */
+#main-content {
+    min-height: 500px;
+    position: relative;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* News Filters */
+.news-filter {
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    background: #f3f4f6;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.news-filter:hover {
+    background: #e5e7eb;
+    border-color: #d1d5db;
+}
+
+.news-filter.active {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+.dark .news-filter {
+    background: #374151;
+    color: #9ca3af;
+    border-color: #4b5563;
+}
+
+.dark .news-filter:hover {
+    background: #4b5563;
+    border-color: #6b7280;
+}
+
+.dark .news-filter.active {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+/* Scrollbar Hide Utility */
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+/* Enhanced Gradient Cards */
+.gradient-card-hover {
+    transition: all 0.3s ease;
+}
+
+.gradient-card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Animated Background Patterns */
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+.floating-element {
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Tab Transition Effects */
+.tab-slide-in {
+    animation: slideInFromRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.tab-slide-out {
+    animation: slideOutToLeft 0.3s cubic-bezier(0.55, 0.06, 0.68, 0.19);
+}
+
+.tab-fade-in {
+    animation: tabFadeIn 0.4s ease-out;
+}
+
+.tab-fade-out {
+    animation: tabFadeOut 0.3s ease-in;
+}
+
+@keyframes slideInFromRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes slideOutToLeft {
+    from {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-30px) scale(0.98);
+    }
+}
+
+@keyframes tabFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes tabFadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+/* Pulse Animation for Active Elements */
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+    }
+}
+
+.pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+
+/* GPU-accelerated animations */
+.currency-card,
+.tab-btn,
+.news-filter,
+.gradient-card-hover {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* Optimized fade-in animation */
+@keyframes optimized-fade-in {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 10px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+.fade-in {
+    animation: optimized-fade-in 0.3s ease-out forwards;
+}
+
+/* Performance optimized pulse */
+@keyframes fast-pulse {
+    0% {
+        transform: scale3d(1, 1, 1);
+    }
+    50% {
+        transform: scale3d(1.02, 1.02, 1);
+    }
+    100% {
+        transform: scale3d(1, 1, 1);
+    }
+}
+
+.pulse-update {
+    animation: fast-pulse 0.6s ease-in-out;
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    
+    .tab-slide-in,
+    .tab-slide-out,
+    .fade-in,
+    .pulse-update {
+        animation: none !important;
+    }
+}
+
+/* Container queries for better responsiveness */
+@container (max-width: 768px) {
+    .currency-card {
+        padding: 1rem;
+    }
+    
+    .tab-btn span {
+        display: none;
+    }
+}
+
+/* Optimize scrolling performance */
+.scrollbar-hide {
+    -webkit-overflow-scrolling: touch;
+    overflow-scrolling: touch;
+}
+
+/* Lazy loading placeholder */
+.currency-card.loading {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.dark .currency-card.loading {
+    background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+    background-size: 200% 100%;
+}
+
+/* Адаптивные улучшения для новых элементов */
+@media (max-width: 768px) {
+    .notification {
+        min-width: auto;
+        margin: 0 1rem;
+    }
+    
+    #sound-toggle {
+        bottom: 1rem;
+        right: 1rem;
+    }
+    
+    .stat-card {
+        padding: 0.75rem;
+    }
+    
+    /* Tab adaptations */
+    .tab-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    
+    .tab-btn span {
+        display: none;
+    }
+    
+    .tab-btn i {
+        margin: 0;
+    }
+}
