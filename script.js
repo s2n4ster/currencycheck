@@ -464,7 +464,7 @@ class CurrencyDashboard {
                 
                 if (priceElement) {
                     priceElement.textContent = currency.type === 'crypto' 
-                        ? this.formatPrice(currency.price)
+                        ? '$' + this.formatPrice(currency.price)
                         : currency.price.toFixed(4);
                 }
                 
@@ -1274,7 +1274,10 @@ class CurrencyDashboard {
         }
         
         const result = (amount * fromCurrency.price) / toCurrency.price;
-        document.getElementById('calc-result').textContent = this.formatPrice(result) + ' ' + toCurrency.symbol;
+        const formattedResult = toCurrency.type === 'crypto' 
+            ? '$' + this.formatPrice(result)
+            : this.formatPrice(result);
+        document.getElementById('calc-result').textContent = formattedResult + ' ' + toCurrency.symbol;
     }
     
     // Закрытие калькулятора
