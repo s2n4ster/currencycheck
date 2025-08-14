@@ -1,6 +1,8 @@
-# 🚀 Live Currency Dashboard
+# 💰 Live Currency Dashboard
 
-> **Самый продвинутый веб-дашборд для отслеживания криптовалют и фиатных валют в реальном времени**
+> **Real-time cryptocurrency and fiat currency tracking with advanced features**
+
+*Last updated: August 2024*
 
 🌐 **[🔗 Открыть приложение](https://s2n4ster.github.io/currencycheck/)** 🌐
 
