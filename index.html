@@ -62,10 +62,46 @@
             </div>
         </header>
 
+        <!-- Tab Navigation -->
+        <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-16 z-40">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <nav class="flex space-x-8 overflow-x-auto scrollbar-hide py-4" id="main-tabs">
+                    <button class="tab-btn active flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 whitespace-nowrap" data-tab="market">
+                        <i class="fas fa-chart-area text-lg"></i>
+                        <span>Рынок</span>
+                        <div class="tab-indicator"></div>
+                    </button>
+                    <button class="tab-btn flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 whitespace-nowrap" data-tab="news">
+                        <i class="fas fa-newspaper text-lg"></i>
+                        <span>Новости</span>
+                        <div class="tab-indicator"></div>
+                    </button>
+                    <button class="tab-btn flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 whitespace-nowrap" data-tab="analytics">
+                        <i class="fas fa-brain text-lg"></i>
+                        <span>Аналитика</span>
+                        <div class="tab-indicator"></div>
+                    </button>
+                    <button class="tab-btn flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 whitespace-nowrap" data-tab="alerts">
+                        <i class="fas fa-bell text-lg"></i>
+                        <span>Уведомления</span>
+                        <div class="tab-indicator"></div>
+                    </button>
+                    <button class="tab-btn flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 whitespace-nowrap" data-tab="strategies">
+                        <i class="fas fa-chess text-lg"></i>
+                        <span>Стратегии</span>
+                        <div class="tab-indicator"></div>
+                    </button>
+                </nav>
+            </div>
+        </div>
+
         <!-- Main Content -->
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <!-- Top Stats Bar -->
-            <div class="mb-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" id="main-content">
+            
+            <!-- Market Tab -->
+            <div class="tab-content active" id="market-tab">
+                <!-- Top Stats Bar -->
+                <div class="mb-6 grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="stat-card bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
                     <div class="text-sm text-gray-600 dark:text-gray-400 relative z-10">Общий объем</div>
                     <div id="total-volume" class="text-lg font-bold text-gray-900 dark:text-white relative z-10">$0</div>
@@ -164,9 +200,393 @@
                 </div>
             </div>
 
-            <!-- Currency Grid -->
-            <div id="currency-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-                <!-- Currency cards will be loaded here -->
+                <!-- Currency Grid -->
+                <div id="currency-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+                    <!-- Currency cards will be loaded here -->
+                </div>
+            </div>
+            
+            <!-- News Tab -->
+            <div class="tab-content" id="news-tab">
+                <div class="space-y-6">
+                    <!-- News Header -->
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-newspaper text-primary-600 mr-3"></i>
+                            Криптоновости
+                        </h2>
+                        <div class="flex items-center space-x-2">
+                            <button id="refresh-news" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+                                <i class="fas fa-sync-alt mr-2"></i>
+                                Обновить
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- News Filters -->
+                    <div class="flex flex-wrap gap-2">
+                        <button class="news-filter active" data-filter="all">Все новости</button>
+                        <button class="news-filter" data-filter="bitcoin">Bitcoin</button>
+                        <button class="news-filter" data-filter="ethereum">Ethereum</button>
+                        <button class="news-filter" data-filter="market">Рынок</button>
+                        <button class="news-filter" data-filter="regulation">Регулирование</button>
+                    </div>
+                    
+                    <!-- News Grid -->
+                    <div id="news-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- News items will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Analytics Tab -->
+            <div class="tab-content" id="analytics-tab">
+                <div class="space-y-8">
+                    <!-- Analytics Header -->
+                    <div class="text-center">
+                        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                            <i class="fas fa-brain text-primary-600 mr-3"></i>
+                            AI Аналитика
+                        </h2>
+                        <p class="text-gray-600 dark:text-gray-400">Интеллектуальный анализ рынка и прогнозирование трендов</p>
+                    </div>
+                    
+                    <!-- Market Sentiment -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2">
+                            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Настроение рынка</h3>
+                                <div id="sentiment-chart" class="h-64"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-green-600 mb-2" id="fear-greed-index">75</div>
+                                    <div class="text-sm text-gray-600 dark:text-gray-400">Индекс страха и жадности</div>
+                                    <div class="mt-2 text-sm font-medium text-green-600">Жадность</div>
+                                </div>
+                            </div>
+                            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                                <h4 class="font-semibold mb-2 text-gray-900 dark:text-white">Социальные сигналы</h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600 dark:text-gray-400">Twitter упоминания</span>
+                                        <span class="text-green-600">+15%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600 dark:text-gray-400">Reddit активность</span>
+                                        <span class="text-red-600">-8%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600 dark:text-gray-400">Google Trends</span>
+                                        <span class="text-green-600">+23%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- AI Predictions -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg p-6 text-white">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-robot text-2xl mr-3"></i>
+                                <h3 class="text-lg font-semibold">AI Прогноз Bitcoin</h3>
+                            </div>
+                            <div class="text-3xl font-bold mb-2">$125,000</div>
+                            <div class="text-sm opacity-90">Прогноз на 7 дней</div>
+                            <div class="mt-4 text-sm">
+                                <div class="flex items-center">
+                                    <i class="fas fa-arrow-up mr-2"></i>
+                                    <span>Вероятность роста: 78%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-green-500 to-teal-600 rounded-lg p-6 text-white">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-chart-line text-2xl mr-3"></i>
+                                <h3 class="text-lg font-semibold">Тренд анализ</h3>
+                            </div>
+                            <div class="text-xl font-bold mb-2">Бычий тренд</div>
+                            <div class="text-sm opacity-90">Сила тренда: 85%</div>
+                            <div class="mt-4 text-sm">
+                                <div class="flex items-center">
+                                    <i class="fas fa-clock mr-2"></i>
+                                    <span>Продолжительность: 2-3 недели</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-orange-500 to-red-600 rounded-lg p-6 text-white">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-exclamation-triangle text-2xl mr-3"></i>
+                                <h3 class="text-lg font-semibold">Риск-анализ</h3>
+                            </div>
+                            <div class="text-xl font-bold mb-2">Средний риск</div>
+                            <div class="text-sm opacity-90">Уровень: 45%</div>
+                            <div class="mt-4 text-sm">
+                                <div class="flex items-center">
+                                    <i class="fas fa-shield-alt mr-2"></i>
+                                    <span>Рекомендация: Диверсификация</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Alerts Tab -->
+            <div class="tab-content" id="alerts-tab">
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-bell text-primary-600 mr-3"></i>
+                            Умные уведомления
+                        </h2>
+                        <button id="add-alert" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+                            <i class="fas fa-plus mr-2"></i>
+                            Добавить алерт
+                        </button>
+                    </div>
+                    
+                    <!-- Alert Types -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-chart-line text-green-600 text-2xl mr-3"></i>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Ценовые алерты</h3>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4">Получайте уведомления при достижении целевых цен</p>
+                            <div class="space-y-2">
+                                <div class="text-sm">
+                                    <span class="text-gray-500">Активных алертов:</span>
+                                    <span class="font-semibold" id="price-alerts-count">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-percentage text-blue-600 text-2xl mr-3"></i>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Изменения %</h3>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4">Уведомления о значительных изменениях цены</p>
+                            <div class="space-y-2">
+                                <div class="text-sm">
+                                    <span class="text-gray-500">Активных алертов:</span>
+                                    <span class="font-semibold" id="percent-alerts-count">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-newspaper text-purple-600 text-2xl mr-3"></i>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Новостные алерты</h3>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4">Важные новости по выбранным валютам</p>
+                            <div class="space-y-2">
+                                <div class="text-sm">
+                                    <span class="text-gray-500">Подписок:</span>
+                                    <span class="font-semibold" id="news-alerts-count">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Active Alerts -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Активные уведомления</h3>
+                        </div>
+                        <div id="alerts-list" class="p-6">
+                            <div class="text-center text-gray-500 dark:text-gray-400 py-8">
+                                <i class="fas fa-bell-slash text-4xl mb-4"></i>
+                                <p>У вас пока нет активных уведомлений</p>
+                                <p class="text-sm mt-2">Нажмите "Добавить алерт" чтобы создать первое уведомление</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Strategies Tab -->
+            <div class="tab-content" id="strategies-tab">
+                <div class="space-y-8">
+                    <div class="text-center">
+                        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                            <i class="fas fa-chess text-primary-600 mr-3"></i>
+                            Торговые стратегии
+                        </h2>
+                        <p class="text-gray-600 dark:text-gray-400">Проверенные стратегии и торговые сигналы</p>
+                    </div>
+                    
+                    <!-- Strategy Cards -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- DCA Strategy -->
+                        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-6 border border-blue-200 dark:border-blue-800">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center text-white mr-4">
+                                    <i class="fas fa-calendar-alt text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">DCA Стратегия</h3>
+                                    <p class="text-blue-600 dark:text-blue-400">Dollar Cost Averaging</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4">
+                                Систематические покупки через равные промежутки времени для снижения влияния волатильности
+                            </p>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Риск:</span>
+                                    <span class="text-green-600 font-medium">Низкий</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Доходность:</span>
+                                    <span class="text-blue-600 font-medium">12-15% годовых</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Временной горизонт:</span>
+                                    <span class="text-gray-900 dark:text-white font-medium">Долгосрочный</span>
+                                </div>
+                            </div>
+                            <button class="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                Настроить DCA
+                            </button>
+                        </div>
+                        
+                        <!-- Grid Trading -->
+                        <div class="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg p-6 border border-green-200 dark:border-green-800">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center text-white mr-4">
+                                    <i class="fas fa-th text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Grid Trading</h3>
+                                    <p class="text-green-600 dark:text-green-400">Сеточная торговля</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4">
+                                Автоматические покупки и продажи в заданном диапазоне цен для получения прибыли от волатильности
+                            </p>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Риск:</span>
+                                    <span class="text-yellow-600 font-medium">Средний</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Доходность:</span>
+                                    <span class="text-green-600 font-medium">20-35% годовых</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Временной горизонт:</span>
+                                    <span class="text-gray-900 dark:text-white font-medium">Средний</span>
+                                </div>
+                            </div>
+                            <button class="w-full mt-4 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                Настроить Grid
+                            </button>
+                        </div>
+                        
+                        <!-- Momentum Strategy -->
+                        <div class="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg p-6 border border-purple-200 dark:border-purple-800">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center text-white mr-4">
+                                    <i class="fas fa-rocket text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Momentum</h3>
+                                    <p class="text-purple-600 dark:text-purple-400">Следование тренду</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4">
+                                Покупка активов, показывающих восходящий тренд, и продажа при его ослаблении
+                            </p>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Риск:</span>
+                                    <span class="text-red-600 font-medium">Высокий</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Доходность:</span>
+                                    <span class="text-purple-600 font-medium">30-60% годовых</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Временной горизонт:</span>
+                                    <span class="text-gray-900 dark:text-white font-medium">Краткосрочный</span>
+                                </div>
+                            </div>
+                            <button class="w-full mt-4 bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                                Настроить Momentum
+                            </button>
+                        </div>
+                        
+                        <!-- HODLing Strategy -->
+                        <div class="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg p-6 border border-amber-200 dark:border-amber-800">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 bg-amber-600 rounded-lg flex items-center justify-center text-white mr-4">
+                                    <i class="fas fa-vault text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">HODL Strategy</h3>
+                                    <p class="text-amber-600 dark:text-amber-400">Долгосрочное удержание</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4">
+                                Покупка и удержание качественных активов на долгий срок, игнорируя краткосрочные колебания
+                            </p>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Риск:</span>
+                                    <span class="text-green-600 font-medium">Низкий</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Доходность:</span>
+                                    <span class="text-amber-600 font-medium">100-300% за 4 года</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Временной горизонт:</span>
+                                    <span class="text-gray-900 dark:text-white font-medium">Очень долгосрочный</span>
+                                </div>
+                            </div>
+                            <button class="w-full mt-4 bg-amber-600 text-white py-2 rounded-lg hover:bg-amber-700 transition-colors">
+                                Настроить HODL
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Trading Signals -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
+                                <i class="fas fa-signal text-primary-600 mr-3"></i>
+                                Торговые сигналы
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                                    <div class="text-2xl font-bold text-green-600 mb-2">BUY</div>
+                                    <div class="text-sm text-gray-600 dark:text-gray-400">Bitcoin</div>
+                                    <div class="text-xs text-green-600 mt-1">RSI: 35 (Перепродан)</div>
+                                </div>
+                                <div class="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+                                    <div class="text-2xl font-bold text-gray-600 mb-2">HOLD</div>
+                                    <div class="text-sm text-gray-600 dark:text-gray-400">Ethereum</div>
+                                    <div class="text-xs text-gray-600 mt-1">RSI: 55 (Нейтрально)</div>
+                                </div>
+                                <div class="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                                    <div class="text-2xl font-bold text-red-600 mb-2">SELL</div>
+                                    <div class="text-sm text-gray-600 dark:text-gray-400">Dogecoin</div>
+                                    <div class="text-xs text-red-600 mt-1">RSI: 75 (Перекуплен)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Chart Modal -->

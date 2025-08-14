@@ -751,6 +751,219 @@
     bottom: calc(100% + 5px);
 }
 
+/* ===== TAB SYSTEM STYLES ===== */
+
+/* Tab Navigation */
+#main-tabs {
+    position: relative;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+#main-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+/* Tab Buttons */
+.tab-btn {
+    position: relative;
+    background: transparent;
+    color: #6b7280;
+    border: 2px solid transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.tab-btn:hover {
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.05);
+    border-color: rgba(59, 130, 246, 0.1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.tab-btn.active {
+    color: #3b82f6;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
+    border-color: #3b82f6;
+    font-weight: 600;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.25);
+}
+
+.dark .tab-btn {
+    color: #9ca3af;
+}
+
+.dark .tab-btn:hover {
+    color: #60a5fa;
+    background: rgba(96, 165, 250, 0.1);
+    border-color: rgba(96, 165, 250, 0.2);
+}
+
+.dark .tab-btn.active {
+    color: #60a5fa;
+    background: linear-gradient(135deg, rgba(96, 165, 250, 0.15), rgba(168, 85, 247, 0.15));
+    border-color: #60a5fa;
+}
+
+/* Tab Indicator */
+.tab-indicator {
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    width: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    border-radius: 2px;
+    transform: translateX(-50%);
+    transition: width 0.3s ease;
+}
+
+.tab-btn.active .tab-indicator {
+    width: 80%;
+}
+
+/* Tab Content */
+.tab-content {
+    display: none;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+.tab-content.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* News Filters */
+.news-filter {
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    background: #f3f4f6;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.news-filter:hover {
+    background: #e5e7eb;
+    border-color: #d1d5db;
+}
+
+.news-filter.active {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+.dark .news-filter {
+    background: #374151;
+    color: #9ca3af;
+    border-color: #4b5563;
+}
+
+.dark .news-filter:hover {
+    background: #4b5563;
+    border-color: #6b7280;
+}
+
+.dark .news-filter.active {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+/* Scrollbar Hide Utility */
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+/* Enhanced Gradient Cards */
+.gradient-card-hover {
+    transition: all 0.3s ease;
+}
+
+.gradient-card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Animated Background Patterns */
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+.floating-element {
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Tab Transition Effects */
+.tab-slide-in {
+    animation: slideInFromRight 0.5s ease-out;
+}
+
+.tab-slide-out {
+    animation: slideOutToLeft 0.3s ease-in;
+}
+
+@keyframes slideInFromRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOutToLeft {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+}
+
+/* Pulse Animation for Active Elements */
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+    }
+}
+
+.pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
 /* Адаптивные улучшения для новых элементов */
 @media (max-width: 768px) {
     .notification {
@@ -765,5 +978,19 @@
     
     .stat-card {
         padding: 0.75rem;
+    }
+    
+    /* Tab adaptations */
+    .tab-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    
+    .tab-btn span {
+        display: none;
+    }
+    
+    .tab-btn i {
+        margin: 0;
     }
 }

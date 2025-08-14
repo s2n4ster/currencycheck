@@ -1370,3 +1370,304 @@ document.addEventListener('visibilitychange', () => {
         }
     }
 });
+
+// ===== TAB SYSTEM MANAGER ===== //
+class TabManager {
+    constructor() {
+        this.currentTab = 'market';
+        this.tabButtons = document.querySelectorAll('.tab-btn');
+        this.tabContents = document.querySelectorAll('.tab-content');
+        this.init();
+    }
+
+    init() {
+        this.tabButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const tabId = e.currentTarget.dataset.tab;
+                this.switchTab(tabId);
+            });
+        });
+
+        // Initialize with market tab
+        this.switchTab('market');
+        
+        // Load initial data for tabs
+        this.loadNewsData();
+        this.loadAnalyticsData();
+        
+        // Setup news filters
+        this.setupNewsFilters();
+    }
+
+    switchTab(tabId) {
+        if (this.currentTab === tabId) return;
+
+        // Add slide out animation to current tab
+        const currentTabContent = document.getElementById(`${this.currentTab}-tab`);
+        if (currentTabContent) {
+            currentTabContent.classList.add('tab-slide-out');
+            
+            setTimeout(() => {
+                currentTabContent.classList.remove('active', 'tab-slide-out');
+            }, 300);
+        }
+
+        // Update tab buttons
+        this.tabButtons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.tab === tabId) {
+                btn.classList.add('active');
+            }
+        });
+
+        // Show new tab content with animation
+        setTimeout(() => {
+            const newTabContent = document.getElementById(`${tabId}-tab`);
+            if (newTabContent) {
+                newTabContent.classList.add('active', 'tab-slide-in');
+                
+                setTimeout(() => {
+                    newTabContent.classList.remove('tab-slide-in');
+                }, 500);
+            }
+        }, 300);
+
+        this.currentTab = tabId;
+
+        // Load tab-specific data
+        this.loadTabData(tabId);
+    }
+
+    loadTabData(tabId) {
+        switch(tabId) {
+            case 'news':
+                this.loadNewsData();
+                break;
+            case 'analytics':
+                this.loadAnalyticsData();
+                break;
+            case 'alerts':
+                this.loadAlertsData();
+                break;
+            case 'strategies':
+                this.loadStrategiesData();
+                break;
+        }
+    }
+
+    setupNewsFilters() {
+        const newsFilters = document.querySelectorAll('.news-filter');
+        newsFilters.forEach(filter => {
+            filter.addEventListener('click', (e) => {
+                newsFilters.forEach(f => f.classList.remove('active'));
+                e.target.classList.add('active');
+                
+                const filterType = e.target.dataset.filter;
+                this.filterNews(filterType);
+            });
+        });
+    }
+
+    filterNews(filterType) {
+        const newsItems = document.querySelectorAll('#news-grid article');
+        newsItems.forEach(item => {
+            const category = item.querySelector('.text-xs').textContent.trim();
+            if (filterType === 'all' || category === filterType) {
+                item.style.display = 'block';
+                item.classList.add('tab-slide-in');
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    loadNewsData() {
+        const newsGrid = document.getElementById('news-grid');
+        if (!newsGrid) return;
+
+        // Simulated news data
+        const newsItems = [
+            {
+                title: "Bitcoin достигает нового максимума в $120,000",
+                excerpt: "Ведущая криптовалюта продолжает бычий тренд на фоне институционального интереса",
+                time: "2 часа назад",
+                category: "bitcoin",
+                icon: "fab fa-bitcoin"
+            },
+            {
+                title: "Ethereum 2.0 показывает впечатляющие результаты",
+                excerpt: "Новая версия сети демонстрирует высокую скорость и низкие комиссии",
+                time: "4 часа назад",
+                category: "ethereum",
+                icon: "fab fa-ethereum"
+            },
+            {
+                title: "Регуляторы обсуждают новые правила для криптовалют",
+                excerpt: "Глобальные регуляторы работают над едиными стандартами",
+                time: "6 часов назад",
+                category: "regulation",
+                icon: "fas fa-gavel"
+            },
+            {
+                title: "Анализ рынка: что ждет криптовалюты в 2024",
+                excerpt: "Эксперты делятся прогнозами на следующий год",
+                time: "8 часов назад",
+                category: "market",
+                icon: "fas fa-chart-line"
+            },
+            {
+                title: "DeFi протоколы набирают популярность",
+                excerpt: "Децентрализованные финансы привлекают все больше пользователей",
+                time: "10 часов назад",
+                category: "market",
+                icon: "fas fa-coins"
+            },
+            {
+                title: "Новые функции в кошельках для криптовалют",
+                excerpt: "Разработчики представили улучшенные возможности безопасности",
+                time: "12 часов назад",
+                category: "bitcoin",
+                icon: "fas fa-wallet"
+            }
+        ];
+
+        newsGrid.innerHTML = newsItems.map(item => `
+            <article class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all duration-300 gradient-card-hover">
+                <div class="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-700">
+                    <div class="w-full h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                        <i class="${item.icon} text-white text-4xl"></i>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-medium px-2 py-1 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-full">
+                            ${item.category}
+                        </span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">${item.time}</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                        ${item.title}
+                    </h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm line-clamp-3">
+                        ${item.excerpt}
+                    </p>
+                    <button class="mt-4 text-primary-600 dark:text-primary-400 text-sm font-medium hover:underline flex items-center">
+                        Читать далее 
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </article>
+        `).join('');
+    }
+
+    loadAnalyticsData() {
+        // Simulate loading analytics data
+        const sentimentChart = document.getElementById('sentiment-chart');
+        if (sentimentChart) {
+            sentimentChart.innerHTML = `
+                <div class="flex items-center justify-center h-full">
+                    <div class="text-center">
+                        <div class="relative mb-4">
+                            <div class="w-32 h-32 mx-auto">
+                                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                    <path class="text-gray-300 dark:text-gray-600" stroke="currentColor" stroke-width="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                                    <path class="text-green-500" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="75, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="text-2xl font-bold text-green-600">75%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-400 font-medium">Позитивное настроение</p>
+                        <p class="text-sm text-gray-500 mt-2">На основе анализа 10,000+ источников</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Update fear and greed index with animation
+        const fearGreedIndex = document.getElementById('fear-greed-index');
+        if (fearGreedIndex) {
+            let currentValue = 0;
+            const targetValue = 75;
+            const animation = setInterval(() => {
+                currentValue += 2;
+                fearGreedIndex.textContent = currentValue;
+                if (currentValue >= targetValue) {
+                    clearInterval(animation);
+                }
+            }, 50);
+        }
+    }
+
+    loadAlertsData() {
+        // Update alert counts with animation
+        const counters = [
+            { id: 'price-alerts-count', value: 0 },
+            { id: 'percent-alerts-count', value: 0 },
+            { id: 'news-alerts-count', value: 0 }
+        ];
+
+        counters.forEach(counter => {
+            const element = document.getElementById(counter.id);
+            if (element) {
+                element.textContent = counter.value;
+            }
+        });
+    }
+
+    loadStrategiesData() {
+        // Add interactive features to strategy cards
+        const strategyCards = document.querySelectorAll('#strategies-tab .bg-gradient-to-br');
+        strategyCards.forEach(card => {
+            card.classList.add('gradient-card-hover');
+            
+            const button = card.querySelector('button');
+            if (button) {
+                button.addEventListener('click', () => {
+                    this.showNotification('Функция настройки стратегии будет доступна в следующем обновлении!', 'info');
+                });
+            }
+        });
+    }
+
+    showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification fixed top-20 right-4 z-50 p-4 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 ${
+            type === 'success' ? 'bg-green-500 text-white' :
+            type === 'error' ? 'bg-red-500 text-white' :
+            'bg-blue-500 text-white'
+        }`;
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : 'info'} mr-2"></i>
+                <span>${message}</span>
+            </div>
+        `;
+
+        document.body.appendChild(notification);
+
+        // Animate in
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 100);
+
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 300);
+        }, 3000);
+    }
+}
+
+// Initialize tab manager when DOM is loaded
+let tabManager;
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        tabManager = new TabManager();
+    });
+} else {
+    tabManager = new TabManager();
+}
