@@ -16,7 +16,7 @@ class CurrencyDashboard {
         this.EXCHANGE_API = 'https://api.fxratesapi.com/latest';
         this.NEWS_API_URLS = [
             'https://api.rss2json.com/v1/api.json?rss_url=https://cointelegraph.com/rss',
-            'https://api.rss2json.com/v1/api.json?rss_url=https://feeds.feedburner.com/coindesk/CoinDesk'
+            'https://api.rss2json.com/v1/api.json?rss_url=https://www.coindesk.com/arc/outboundfeeds/rss/'
         ];
         
         // Состояние приложения
@@ -1813,21 +1813,29 @@ class TabManager {
     }
 
     async loadNewsData(forceRefresh = false) {
+        console.log('Loading news data, forceRefresh:', forceRefresh);
         const newsGrid = document.getElementById('news-grid');
-        if (!newsGrid) return;
+        if (!newsGrid) {
+            console.log('News grid not found');
+            return;
+        }
         
         // Проверяем кеш новостей
         const now = Date.now();
         if (!forceRefresh && this.cache.news.data && (now - this.cache.news.timestamp) < this.cache.news.duration) {
+            console.log('Using cached news data');
             this.renderNews(this.cache.news.data);
             return;
         }
 
         // Показываем индикатор загрузки
+        console.log('Showing news loading indicator');
         this.showNewsLoading();
 
         try {
+            console.log('Fetching news from API...');
             const newsData = await this.fetchNewsFromAPI();
+            console.log('News data received:', newsData.length, 'items');
             this.cache.news = {
                 data: newsData,
                 timestamp: now,
