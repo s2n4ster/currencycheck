@@ -11,8 +11,13 @@ class CurrencyDashboard {
     constructor() {
         // Конфигурация
         this.UPDATE_INTERVAL = 15000; // 15 секунд
+        this.NEWS_UPDATE_INTERVAL = 300000; // 5 минут для новостей
         this.COINGECKO_API = 'https://api.coingecko.com/api/v3';
         this.EXCHANGE_API = 'https://api.fxratesapi.com/latest';
+        this.NEWS_API_URLS = [
+            'https://api.rss2json.com/v1/api.json?rss_url=https://cointelegraph.com/rss',
+            'https://api.rss2json.com/v1/api.json?rss_url=https://feeds.feedburner.com/coindesk/CoinDesk'
+        ];
         
         // Состояние приложения
         this.currencies = [];
@@ -27,11 +32,13 @@ class CurrencyDashboard {
         this.soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
         this.priceAlerts = this.loadPriceAlerts();
         this.lastPrices = {};
+        this.newsUpdateInterval = null;
         
         // Кеширование для оптимизации
         this.cache = {
             crypto: { data: null, timestamp: 0, duration: 30000 }, // 30 секунд
-            fiat: { data: null, timestamp: 0, duration: 300000 }   // 5 минут
+            fiat: { data: null, timestamp: 0, duration: 300000 },   // 5 минут
+            news: { data: null, timestamp: 0, duration: 300000 }    // 5 минут для новостей
         };
         
         // Список отслеживаемых валют и криптовалют (расширенный)
@@ -114,6 +121,11 @@ class CurrencyDashboard {
         this.initSound();
         this.fetchCurrencyData();
         this.startAutoUpdate();
+        
+        // Загружаем новости при инициализации
+        setTimeout(() => {
+            this.loadNewsData();
+        }, 1000); // Небольшая задержка для загрузки основного интерфейса
         
         console.log('Currency Dashboard initialized successfully');
     }
@@ -208,6 +220,12 @@ class CurrencyDashboard {
         // Звуковые уведомления
         document.getElementById('sound-toggle').addEventListener('click', () => {
             this.toggleSound();
+        });
+        
+        // Обновление новостей
+        document.getElementById('refresh-news').addEventListener('click', () => {
+            this.loadNewsData(true); // Принудительное обновление
+            this.showNotification('Новости обновляются...', 'info');
         });
         
         // Калькулятор - обновление при изменении значений
@@ -1068,6 +1086,16 @@ class CurrencyDashboard {
         this.updateInterval = setInterval(() => {
             this.fetchCurrencyData();
         }, this.UPDATE_INTERVAL);
+        
+        // Запуск автообновления новостей
+        this.startNewsAutoUpdate();
+    }
+    
+    // Запуск автообновления новостей
+    startNewsAutoUpdate() {
+        this.newsUpdateInterval = setInterval(() => {
+            this.loadNewsData(true); // Принудительное обновление
+        }, this.NEWS_UPDATE_INTERVAL);
     }
     
     // Остановка автообновления
@@ -1075,6 +1103,10 @@ class CurrencyDashboard {
         if (this.updateInterval) {
             clearInterval(this.updateInterval);
             this.updateInterval = null;
+        }
+        if (this.newsUpdateInterval) {
+            clearInterval(this.newsUpdateInterval);
+            this.newsUpdateInterval = null;
         }
     }
     
@@ -1629,6 +1661,7 @@ document.addEventListener('visibilitychange', () => {
         } else {
             window.dashboard.startAutoUpdate();
             window.dashboard.fetchCurrencyData(); // Обновляем данные при возвращении на страницу
+            window.dashboard.loadNewsData(true); // Обновляем новости при возвращении на страницу
         }
     }
 });
@@ -1770,58 +1803,125 @@ class TabManager {
         });
     }
 
-    loadNewsData() {
+    async loadNewsData(forceRefresh = false) {
         const newsGrid = document.getElementById('news-grid');
         if (!newsGrid) return;
         
-        // Проверяем, загружены ли уже новости
-        if (newsGrid.children.length > 0) return;
+        // Проверяем кеш новостей
+        const now = Date.now();
+        if (!forceRefresh && this.cache.news.data && (now - this.cache.news.timestamp) < this.cache.news.duration) {
+            this.renderNews(this.cache.news.data);
+            return;
+        }
 
-        // Simulated news data
-        const newsItems = [
-            {
-                title: "Bitcoin достигает нового максимума в $120,000",
-                excerpt: "Ведущая криптовалюта продолжает бычий тренд на фоне институционального интереса",
-                time: "2 часа назад",
-                category: "bitcoin",
-                icon: "fab fa-bitcoin"
-            },
-            {
-                title: "Ethereum 2.0 показывает впечатляющие результаты",
-                excerpt: "Новая версия сети демонстрирует высокую скорость и низкие комиссии",
-                time: "4 часа назад",
-                category: "ethereum",
-                icon: "fab fa-ethereum"
-            },
-            {
-                title: "Регуляторы обсуждают новые правила для криптовалют",
-                excerpt: "Глобальные регуляторы работают над едиными стандартами",
-                time: "6 часов назад",
-                category: "regulation",
-                icon: "fas fa-gavel"
-            },
-            {
-                title: "Анализ рынка: что ждет криптовалюты в 2024",
-                excerpt: "Эксперты делятся прогнозами на следующий год",
-                time: "8 часов назад",
-                category: "market",
-                icon: "fas fa-chart-line"
-            },
-            {
-                title: "DeFi протоколы набирают популярность",
-                excerpt: "Децентрализованные финансы привлекают все больше пользователей",
-                time: "10 часов назад",
-                category: "market",
-                icon: "fas fa-coins"
-            },
-            {
-                title: "Новые функции в кошельках для криптовалют",
-                excerpt: "Разработчики представили улучшенные возможности безопасности",
-                time: "12 часов назад",
-                category: "bitcoin",
-                icon: "fas fa-wallet"
+        // Показываем индикатор загрузки
+        this.showNewsLoading();
+
+        try {
+            const newsData = await this.fetchNewsFromAPI();
+            this.cache.news = {
+                data: newsData,
+                timestamp: now,
+                duration: this.cache.news.duration
+            };
+            this.renderNews(newsData);
+        } catch (error) {
+            console.error('Ошибка загрузки новостей:', error);
+            this.renderFallbackNews(); // Показываем резервные новости при ошибке
+        }
+    }
+
+    async fetchNewsFromAPI() {
+        const allNews = [];
+        
+        // Пытаемся получить новости из нескольких источников
+        for (const apiUrl of this.NEWS_API_URLS) {
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) continue;
+                
+                const data = await response.json();
+                if (data.status === 'ok' && data.items) {
+                    const processedItems = data.items.slice(0, 10).map(item => this.processNewsItem(item));
+                    allNews.push(...processedItems);
+                }
+            } catch (error) {
+                console.warn('Ошибка получения новостей из источника:', apiUrl, error);
+                continue;
             }
-        ];
+        }
+
+        // Сортируем по дате и берем последние 6 новостей
+        return allNews
+            .sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate))
+            .slice(0, 6);
+    }
+
+    processNewsItem(item) {
+        const category = this.categorizeNews(item.title + ' ' + item.description);
+        const timeAgo = this.getTimeAgo(new Date(item.pubDate));
+        
+        return {
+            title: item.title,
+            excerpt: item.description.replace(/<[^>]*>/g, '').substring(0, 150) + '...',
+            time: timeAgo,
+            category: category,
+            icon: this.getCategoryIcon(category),
+            link: item.link,
+            pubDate: item.pubDate
+        };
+    }
+
+    categorizeNews(text) {
+        const textLower = text.toLowerCase();
+        
+        if (textLower.includes('bitcoin') || textLower.includes('btc')) return 'bitcoin';
+        if (textLower.includes('ethereum') || textLower.includes('eth')) return 'ethereum';
+        if (textLower.includes('регул') || textLower.includes('закон') || textLower.includes('regulation')) return 'regulation';
+        if (textLower.includes('рынок') || textLower.includes('market') || textLower.includes('trading')) return 'market';
+        
+        return 'market'; // По умолчанию
+    }
+
+    getCategoryIcon(category) {
+        const icons = {
+            bitcoin: 'fab fa-bitcoin',
+            ethereum: 'fab fa-ethereum',
+            regulation: 'fas fa-gavel',
+            market: 'fas fa-chart-line'
+        };
+        return icons[category] || 'fas fa-newspaper';
+    }
+
+    getTimeAgo(date) {
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMins / 60);
+        const diffDays = Math.floor(diffHours / 24);
+
+        if (diffMins < 60) return `${diffMins} мин назад`;
+        if (diffHours < 24) return `${diffHours} ч назад`;
+        return `${diffDays} дн назад`;
+    }
+
+    showNewsLoading() {
+        const newsGrid = document.getElementById('news-grid');
+        if (!newsGrid) return;
+        
+        newsGrid.innerHTML = `
+            <div class="col-span-full flex items-center justify-center py-12">
+                <div class="text-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+                    <p class="text-gray-600 dark:text-gray-400">Загрузка новостей...</p>
+                </div>
+            </div>
+        `;
+    }
+
+    renderNews(newsItems) {
+        const newsGrid = document.getElementById('news-grid');
+        if (!newsGrid || !newsItems.length) return;
 
         newsGrid.innerHTML = newsItems.map(item => `
             <article class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all duration-300 gradient-card-hover">
@@ -1843,13 +1943,37 @@ class TabManager {
                     <p class="text-gray-600 dark:text-gray-400 text-sm line-clamp-3">
                         ${item.excerpt}
                     </p>
-                    <button class="mt-4 text-primary-600 dark:text-primary-400 text-sm font-medium hover:underline flex items-center">
+                    <button onclick="window.open('${item.link}', '_blank')" class="mt-4 text-primary-600 dark:text-primary-400 text-sm font-medium hover:underline flex items-center">
                         Читать далее 
                         <i class="fas fa-arrow-right ml-2"></i>
                     </button>
                 </div>
             </article>
         `).join('');
+    }
+
+    renderFallbackNews() {
+        // Fallback новости при ошибке загрузки
+        const fallbackNews = [
+            {
+                title: "Добро пожаловать в Currency Dashboard",
+                excerpt: "Отслеживайте курсы криптовалют и фиатных валют в режиме реального времени",
+                time: "сейчас",
+                category: "market",
+                icon: "fas fa-chart-line",
+                link: "#"
+            },
+            {
+                title: "Новости криптовалют временно недоступны",
+                excerpt: "Проверьте подключение к интернету и попробуйте обновить страницу",
+                time: "сейчас",
+                category: "market",
+                icon: "fas fa-exclamation-triangle",
+                link: "#"
+            }
+        ];
+        
+        this.renderNews(fallbackNews);
     }
 
     loadAnalyticsData() {
