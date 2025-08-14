@@ -21,7 +21,7 @@ class CurrencyDashboard {
         this.updateInterval = null;
         this.chart = null;
         this.currentCurrency = null;
-        this.currentTimeframe = { days: 7, interval: 'daily' };
+        this.currentTimeframe = { days: 7 };
         this.portfolio = this.loadPortfolio();
         this.searchTimeout = null;
         this.soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
@@ -452,7 +452,7 @@ class CurrencyDashboard {
             const title = document.getElementById('chart-title');
             
             // Сброс к первому временному промежутку
-            this.currentTimeframe = { days: 1, interval: 'hourly' };
+            this.currentTimeframe = { days: 1 };
             this.updateTimeframeButtons();
             
             title.textContent = `${currencyName} - График цены`;
@@ -472,9 +472,8 @@ class CurrencyDashboard {
     // Установка временного промежутка
     async setTimeframe(button) {
         const days = parseInt(button.dataset.days);
-        const interval = button.dataset.interval;
         
-        this.currentTimeframe = { days, interval };
+        this.currentTimeframe = { days };
         this.updateTimeframeButtons();
         
         if (this.currentCurrency) {
@@ -497,30 +496,41 @@ class CurrencyDashboard {
         try {
             this.showChartLoading(true);
             
-            // Определяем интервал на основе временного промежутка
-            let interval = this.currentTimeframe.interval;
-            if (this.currentTimeframe.days === 1) {
-                interval = 'hourly';
-            } else if (this.currentTimeframe.days <= 30) {
-                interval = 'daily';
-            } else {
-                interval = 'daily';
-            }
+            // Добавляем небольшую задержку для избежания слишком частых запросов
+            await new Promise(resolve => setTimeout(resolve, 300));
             
+            // Используем только параметр days без interval для совместимости с бесплатным API
             const response = await fetch(
-                `${this.COINGECKO_API}/coins/${this.currentCurrency.id}/market_chart?vs_currency=usd&days=${this.currentTimeframe.days}&interval=${interval}`
+                `${this.COINGECKO_API}/coins/${this.currentCurrency.id}/market_chart?vs_currency=usd&days=${this.currentTimeframe.days}`
             );
             
             if (!response.ok) {
-                throw new Error('Не удалось загрузить данные графика');
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
             
             const data = await response.json();
+            
+            // Проверяем, что данные получены корректно
+            if (!data.prices || data.prices.length === 0) {
+                throw new Error('Получены пустые данные графика');
+            }
+            
             this.renderChart(data.prices, this.currentCurrency.name);
             
         } catch (error) {
             console.error('Ошибка при загрузке данных графика:', error);
-            this.showChartError('Не удалось загрузить данные графика');
+            
+            // Показываем более информативную ошибку
+            let errorMessage = 'Не удалось загрузить данные графика';
+            if (error.message.includes('404')) {
+                errorMessage = 'Данные для этой валюты недоступны';
+            } else if (error.message.includes('503') || error.message.includes('502')) {
+                errorMessage = 'Сервис временно недоступен, попробуйте позже';
+            } else if (error.message.includes('network') || error.name === 'TypeError') {
+                errorMessage = 'Проблема с подключением к интернету';
+            }
+            
+            this.showChartError(errorMessage);
         } finally {
             this.showChartLoading(false);
         }
@@ -545,6 +555,16 @@ class CurrencyDashboard {
         const canvas = document.getElementById('price-chart');
         const ctx = canvas.getContext('2d');
         
+        // Уничтожаем предыдущий график, если он есть
+        if (this.chart) {
+            this.chart.destroy();
+            this.chart = null;
+        }
+        
+        // Устанавливаем размеры canvas
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        
         // Очищаем canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
@@ -552,7 +572,36 @@ class CurrencyDashboard {
         ctx.fillStyle = '#ef4444';
         ctx.font = '16px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText(message, canvas.width / 2, canvas.height / 2);
+        ctx.textBaseline = 'middle';
+        
+        // Разбиваем длинное сообщение на строки
+        const words = message.split(' ');
+        const lines = [];
+        let currentLine = words[0];
+        
+        for (let i = 1; i < words.length; i++) {
+            const word = words[i];
+            const width = ctx.measureText(currentLine + ' ' + word).width;
+            if (width < canvas.width - 40) {
+                currentLine += ' ' + word;
+            } else {
+                lines.push(currentLine);
+                currentLine = word;
+            }
+        }
+        lines.push(currentLine);
+        
+        // Выводим строки
+        const lineHeight = 20;
+        const startY = canvas.height / 2 - (lines.length - 1) * lineHeight / 2;
+        
+        lines.forEach((line, index) => {
+            ctx.fillText(line, canvas.width / 2, startY + index * lineHeight);
+        });
+        
+        // Добавляем иконку ошибки
+        ctx.font = '24px FontAwesome';
+        ctx.fillText('⚠', canvas.width / 2, startY - 40);
     }
     
     // Отрисовка графика
