@@ -17,6 +17,13 @@
     <!-- Дополнительные стили -->
     <link rel="stylesheet" href="style.css">
     
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="CurrencyDash">
+    
     <!-- Настройка Tailwind для темной темы -->
     <script>
         tailwind.config = {
@@ -57,24 +64,72 @@
 
         <!-- Main Content -->
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Top Stats Bar -->
+            <div class="mb-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                    <div class="text-sm text-gray-600 dark:text-gray-400">Общий объем</div>
+                    <div id="total-volume" class="text-lg font-bold text-gray-900 dark:text-white">$0</div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                    <div class="text-sm text-gray-600 dark:text-gray-400">Топ растет</div>
+                    <div id="top-gainer" class="text-lg font-bold text-green-600">-</div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                    <div class="text-sm text-gray-600 dark:text-gray-400">Топ падает</div>
+                    <div id="top-loser" class="text-lg font-bold text-red-600">-</div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                    <div class="text-sm text-gray-600 dark:text-gray-400">Активных валют</div>
+                    <div id="active-currencies" class="text-lg font-bold text-gray-900 dark:text-white">0</div>
+                </div>
+            </div>
+
             <!-- Controls -->
-            <div class="mb-8 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-                <div class="flex items-center gap-4">
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-sync-alt text-primary-600"></i>
-                        <span class="text-sm text-gray-600 dark:text-gray-400">Обновление каждые 15 сек</span>
+            <div class="mb-8 flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-center">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto">
+                    <!-- Search -->
+                    <div class="relative flex-1 sm:flex-none">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <input 
+                            type="text" 
+                            id="search-input"
+                            placeholder="Поиск валют..." 
+                            class="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors w-full sm:w-64"
+                        >
                     </div>
-                    <div id="last-update" class="text-sm text-gray-500 dark:text-gray-400"></div>
+                    
+                    <!-- Update Info -->
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-sync-alt text-primary-600" id="sync-icon"></i>
+                            <span class="text-sm text-gray-600 dark:text-gray-400">Обновление каждые 15 сек</span>
+                        </div>
+                        <div id="last-update" class="text-sm text-gray-500 dark:text-gray-400"></div>
+                    </div>
                 </div>
                 
-                <!-- Favorites Filter -->
-                <div class="flex items-center gap-2">
+                <!-- Filters and Tools -->
+                <div class="flex flex-wrap items-center gap-2">
                     <button id="show-all" class="px-3 py-1 text-sm rounded-full bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-700">
                         Все валюты
                     </button>
                     <button id="show-favorites" class="px-3 py-1 text-sm rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600">
                         <i class="fas fa-star mr-1"></i>
                         Избранное
+                    </button>
+                    <button id="show-calculator" class="px-3 py-1 text-sm rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600">
+                        <i class="fas fa-calculator mr-1"></i>
+                        Калькулятор
+                    </button>
+                    <button id="show-portfolio" class="px-3 py-1 text-sm rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600">
+                        <i class="fas fa-briefcase mr-1"></i>
+                        Портфель
+                    </button>
+                    <button id="export-data" class="px-3 py-1 text-sm rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600">
+                        <i class="fas fa-download mr-1"></i>
+                        Экспорт
                     </button>
                 </div>
             </div>
@@ -162,6 +217,112 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Calculator Modal -->
+            <div id="calculator-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+                <div class="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full">
+                    <div class="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            <i class="fas fa-calculator mr-2"></i>
+                            Калькулятор валют
+                        </h3>
+                        <button id="close-calculator" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                            <i class="fas fa-times text-gray-600 dark:text-gray-400"></i>
+                        </button>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Из валюты</label>
+                                <select id="calc-from" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                    <option value="">Выберите валюту...</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Количество</label>
+                                <input type="number" id="calc-amount" placeholder="1" value="1" 
+                                       class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">В валюту</label>
+                                <select id="calc-to" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                    <option value="">Выберите валюту...</option>
+                                </select>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                <div class="text-sm text-gray-600 dark:text-gray-400">Результат</div>
+                                <div id="calc-result" class="text-2xl font-bold text-gray-900 dark:text-white">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Portfolio Modal -->
+            <div id="portfolio-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+                <div class="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
+                    <div class="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            <i class="fas fa-briefcase mr-2"></i>
+                            Мой портфель
+                        </h3>
+                        <button id="close-portfolio" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                            <i class="fas fa-times text-gray-600 dark:text-gray-400"></i>
+                        </button>
+                    </div>
+                    <div class="p-6">
+                        <!-- Portfolio Summary -->
+                        <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                <div class="text-sm text-gray-600 dark:text-gray-400">Общая стоимость</div>
+                                <div id="portfolio-total" class="text-xl font-bold text-gray-900 dark:text-white">$0.00</div>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                <div class="text-sm text-gray-600 dark:text-gray-400">24ч изменение</div>
+                                <div id="portfolio-change" class="text-xl font-bold">$0.00</div>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                <div class="text-sm text-gray-600 dark:text-gray-400">Активов</div>
+                                <div id="portfolio-assets" class="text-xl font-bold text-gray-900 dark:text-white">0</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Add Asset -->
+                        <div class="mb-6 p-4 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
+                            <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Добавить актив</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                                <select id="portfolio-currency" class="p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                    <option value="">Выберите валюту...</option>
+                                </select>
+                                <input type="number" id="portfolio-amount" placeholder="Количество" 
+                                       class="p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                <input type="number" id="portfolio-price" placeholder="Цена покупки" 
+                                       class="p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                <button id="add-to-portfolio" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+                                    <i class="fas fa-plus mr-1"></i>
+                                    Добавить
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Portfolio List -->
+                        <div id="portfolio-list" class="space-y-3">
+                            <div class="text-center text-gray-500 dark:text-gray-400 py-8">
+                                <i class="fas fa-briefcase text-4xl mb-4"></i>
+                                <p>Ваш портфель пуст. Добавьте активы выше.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Notification Container -->
+            <div id="notifications" class="fixed top-4 right-4 z-50 space-y-2"></div>
+            
+            <!-- Sound Toggle -->
+            <button id="sound-toggle" class="fixed bottom-4 right-4 p-3 bg-primary-600 text-white rounded-full shadow-lg hover:bg-primary-700 transition-colors z-40">
+                <i id="sound-icon" class="fas fa-volume-up"></i>
+            </button>
         </main>
     </div>
 

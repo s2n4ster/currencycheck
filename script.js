@@ -22,6 +22,11 @@ class CurrencyDashboard {
         this.chart = null;
         this.currentCurrency = null;
         this.currentTimeframe = { days: 7, interval: 'daily' };
+        this.portfolio = this.loadPortfolio();
+        this.searchTimeout = null;
+        this.soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+        this.priceAlerts = this.loadPriceAlerts();
+        this.lastPrices = {};
         
         // Список отслеживаемых валют и криптовалют
         this.currencyList = [
@@ -48,6 +53,7 @@ class CurrencyDashboard {
     init() {
         this.setupEventListeners();
         this.initTheme();
+        this.initSound();
         this.fetchCurrencyData();
         this.startAutoUpdate();
         
@@ -96,6 +102,53 @@ class CurrencyDashboard {
                 this.setTimeframe(btn);
             }
         });
+        
+        // Поиск валют
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = setTimeout(() => {
+                this.searchCurrencies(e.target.value);
+            }, 300);
+        });
+        
+        // Калькулятор
+        document.getElementById('show-calculator').addEventListener('click', () => {
+            this.showCalculator();
+        });
+        
+        document.getElementById('close-calculator').addEventListener('click', () => {
+            this.closeCalculator();
+        });
+        
+        // Портфель
+        document.getElementById('show-portfolio').addEventListener('click', () => {
+            this.showPortfolio();
+        });
+        
+        document.getElementById('close-portfolio').addEventListener('click', () => {
+            this.closePortfolio();
+        });
+        
+        document.getElementById('add-to-portfolio').addEventListener('click', () => {
+            this.addToPortfolio();
+        });
+        
+        // Экспорт данных
+        document.getElementById('export-data').addEventListener('click', () => {
+            this.exportData();
+        });
+        
+        // Звуковые уведомления
+        document.getElementById('sound-toggle').addEventListener('click', () => {
+            this.toggleSound();
+        });
+        
+        // Калькулятор - обновление при изменении значений
+        ['calc-from', 'calc-to', 'calc-amount'].forEach(id => {
+            document.getElementById(id).addEventListener('change', () => {
+                this.calculateConversion();
+            });
+        });
     }
     
     // Инициализация темы
@@ -110,6 +163,17 @@ class CurrencyDashboard {
         } else {
             document.documentElement.classList.remove('dark');
             document.getElementById('theme-icon').className = 'fas fa-moon';
+        }
+    }
+    
+    // Инициализация звука
+    initSound() {
+        const button = document.getElementById('sound-toggle');
+        const icon = document.getElementById('sound-icon');
+        
+        if (!this.soundEnabled) {
+            button.classList.add('muted');
+            icon.className = 'fas fa-volume-mute';
         }
     }
     
@@ -133,6 +197,7 @@ class CurrencyDashboard {
         try {
             this.showLoading(true);
             this.hideError();
+            this.animateSync();
             
             // Получаем данные криптовалют и фиатных валют параллельно
             const [cryptoData, fiatData] = await Promise.all([
@@ -143,6 +208,8 @@ class CurrencyDashboard {
             this.currencies = [...cryptoData, ...fiatData];
             this.renderCurrencies();
             this.updateLastUpdateTime();
+            this.updateStatistics();
+            this.checkPriceAlerts();
             
         } catch (error) {
             console.error('Ошибка при получении данных:', error);
@@ -725,6 +792,441 @@ class CurrencyDashboard {
     // Скрытие ошибки
     hideError() {
         document.getElementById('error-message').classList.add('hidden');
+    }
+    
+    // Поиск валют
+    searchCurrencies(query) {
+        if (!query.trim()) {
+            this.renderCurrencies();
+            return;
+        }
+        
+        const filteredCurrencies = this.currencies.filter(currency =>
+            currency.name.toLowerCase().includes(query.toLowerCase()) ||
+            currency.symbol.toLowerCase().includes(query.toLowerCase())
+        );
+        
+        this.renderFilteredCurrencies(filteredCurrencies);
+    }
+    
+    // Отображение отфильтрованных валют
+    renderFilteredCurrencies(currencies) {
+        const grid = document.getElementById('currency-grid');
+        
+        if (currencies.length === 0) {
+            grid.innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <i class="fas fa-search text-4xl text-gray-300 dark:text-gray-600 mb-4"></i>
+                    <p class="text-gray-500 dark:text-gray-400">Валюты не найдены</p>
+                </div>
+            `;
+            return;
+        }
+        
+        grid.innerHTML = currencies.map(currency => this.createCurrencyCard(currency)).join('');
+        
+        // Добавляем анимацию появления
+        setTimeout(() => {
+            grid.querySelectorAll('.currency-card').forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('fade-in');
+                }, index * 50);
+            });
+        }, 50);
+    }
+    
+    // Обновление статистики
+    updateStatistics() {
+        if (this.currencies.length === 0) return;
+        
+        const cryptoCurrencies = this.currencies.filter(c => c.type === 'crypto');
+        
+        // Общий объем (примерная оценка)
+        const totalVolume = cryptoCurrencies.reduce((sum, currency) => {
+            return sum + (currency.price * 1000000); // Примерный объем
+        }, 0);
+        
+        document.getElementById('total-volume').textContent = this.formatLargeNumber(totalVolume);
+        
+        // Топ растущая валюта
+        const topGainer = cryptoCurrencies.reduce((max, currency) => 
+            currency.change24h > (max?.change24h || -Infinity) ? currency : max
+        , null);
+        
+        if (topGainer) {
+            document.getElementById('top-gainer').textContent = 
+                `${topGainer.symbol} +${topGainer.change24h.toFixed(2)}%`;
+        }
+        
+        // Топ падающая валюта
+        const topLoser = cryptoCurrencies.reduce((min, currency) => 
+            currency.change24h < (min?.change24h || Infinity) ? currency : min
+        , null);
+        
+        if (topLoser) {
+            document.getElementById('top-loser').textContent = 
+                `${topLoser.symbol} ${topLoser.change24h.toFixed(2)}%`;
+        }
+        
+        // Количество активных валют
+        document.getElementById('active-currencies').textContent = this.currencies.length;
+    }
+    
+    // Форматирование больших чисел
+    formatLargeNumber(num) {
+        if (num >= 1e12) return '$' + (num / 1e12).toFixed(1) + 'T';
+        if (num >= 1e9) return '$' + (num / 1e9).toFixed(1) + 'B';
+        if (num >= 1e6) return '$' + (num / 1e6).toFixed(1) + 'M';
+        if (num >= 1e3) return '$' + (num / 1e3).toFixed(1) + 'K';
+        return '$' + num.toFixed(0);
+    }
+    
+    // Показ калькулятора
+    showCalculator() {
+        const modal = document.getElementById('calculator-modal');
+        modal.classList.remove('hidden');
+        
+        // Заполняем селекты валютами
+        this.populateCalculatorSelects();
+    }
+    
+    // Заполнение селектов калькулятора
+    populateCalculatorSelects() {
+        const fromSelect = document.getElementById('calc-from');
+        const toSelect = document.getElementById('calc-to');
+        
+        const options = this.currencies.map(currency => 
+            `<option value="${currency.id}">${currency.name} (${currency.symbol})</option>`
+        ).join('');
+        
+        fromSelect.innerHTML = '<option value="">Выберите валюту...</option>' + options;
+        toSelect.innerHTML = '<option value="">Выберите валюту...</option>' + options;
+    }
+    
+    // Расчет конвертации
+    calculateConversion() {
+        const fromId = document.getElementById('calc-from').value;
+        const toId = document.getElementById('calc-to').value;
+        const amount = parseFloat(document.getElementById('calc-amount').value) || 0;
+        
+        if (!fromId || !toId || amount <= 0) {
+            document.getElementById('calc-result').textContent = '-';
+            return;
+        }
+        
+        const fromCurrency = this.currencies.find(c => c.id === fromId);
+        const toCurrency = this.currencies.find(c => c.id === toId);
+        
+        if (!fromCurrency || !toCurrency) {
+            document.getElementById('calc-result').textContent = '-';
+            return;
+        }
+        
+        const result = (amount * fromCurrency.price) / toCurrency.price;
+        document.getElementById('calc-result').textContent = this.formatPrice(result) + ' ' + toCurrency.symbol;
+    }
+    
+    // Закрытие калькулятора
+    closeCalculator() {
+        document.getElementById('calculator-modal').classList.add('hidden');
+    }
+    
+    // Показ портфеля
+    showPortfolio() {
+        const modal = document.getElementById('portfolio-modal');
+        modal.classList.remove('hidden');
+        
+        this.populatePortfolioSelect();
+        this.renderPortfolio();
+    }
+    
+    // Заполнение селекта портфеля
+    populatePortfolioSelect() {
+        const select = document.getElementById('portfolio-currency');
+        const options = this.currencies.map(currency => 
+            `<option value="${currency.id}">${currency.name} (${currency.symbol})</option>`
+        ).join('');
+        
+        select.innerHTML = '<option value="">Выберите валюту...</option>' + options;
+    }
+    
+    // Добавление в портфель
+    addToPortfolio() {
+        const currencyId = document.getElementById('portfolio-currency').value;
+        const amount = parseFloat(document.getElementById('portfolio-amount').value);
+        const buyPrice = parseFloat(document.getElementById('portfolio-price').value);
+        
+        if (!currencyId || !amount || amount <= 0 || !buyPrice || buyPrice <= 0) {
+            this.showNotification('Заполните все поля', 'error');
+            return;
+        }
+        
+        const currency = this.currencies.find(c => c.id === currencyId);
+        if (!currency) return;
+        
+        const portfolioItem = {
+            id: currencyId,
+            name: currency.name,
+            symbol: currency.symbol,
+            amount: amount,
+            buyPrice: buyPrice,
+            addedAt: Date.now()
+        };
+        
+        this.portfolio.push(portfolioItem);
+        this.savePortfolio();
+        this.renderPortfolio();
+        
+        // Очищаем форму
+        document.getElementById('portfolio-currency').value = '';
+        document.getElementById('portfolio-amount').value = '';
+        document.getElementById('portfolio-price').value = '';
+        
+        this.showNotification('Актив добавлен в портфель', 'success');
+    }
+    
+    // Отрисовка портфеля
+    renderPortfolio() {
+        const container = document.getElementById('portfolio-list');
+        
+        if (this.portfolio.length === 0) {
+            container.innerHTML = `
+                <div class="text-center text-gray-500 dark:text-gray-400 py-8">
+                    <i class="fas fa-briefcase text-4xl mb-4"></i>
+                    <p>Ваш портфель пуст. Добавьте активы выше.</p>
+                </div>
+            `;
+            this.updatePortfolioSummary(0, 0, 0);
+            return;
+        }
+        
+        let totalValue = 0;
+        let totalChange = 0;
+        
+        const portfolioHtml = this.portfolio.map((item, index) => {
+            const currentCurrency = this.currencies.find(c => c.id === item.id);
+            if (!currentCurrency) return '';
+            
+            const currentValue = item.amount * currentCurrency.price;
+            const investedValue = item.amount * item.buyPrice;
+            const profit = currentValue - investedValue;
+            const profitPercent = (profit / investedValue) * 100;
+            
+            totalValue += currentValue;
+            totalChange += profit;
+            
+            const profitClass = profit >= 0 ? 'text-green-600' : 'text-red-600';
+            
+            return `
+                <div class="portfolio-item">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-sm mr-3">
+                                ${item.symbol.substring(0, 2)}
+                            </div>
+                            <div>
+                                <div class="font-semibold text-gray-900 dark:text-white">${item.name}</div>
+                                <div class="text-sm text-gray-500 dark:text-gray-400">${item.amount} ${item.symbol}</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-semibold text-gray-900 dark:text-white">$${currentValue.toFixed(2)}</div>
+                            <div class="${profitClass} text-sm">
+                                ${profit >= 0 ? '+' : ''}$${profit.toFixed(2)} (${profitPercent.toFixed(2)}%)
+                            </div>
+                        </div>
+                        <button onclick="dashboard.removeFromPortfolio(${index})" 
+                                class="ml-4 p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        container.innerHTML = portfolioHtml;
+        this.updatePortfolioSummary(totalValue, totalChange, this.portfolio.length);
+    }
+    
+    // Обновление сводки портфеля
+    updatePortfolioSummary(totalValue, totalChange, assetsCount) {
+        document.getElementById('portfolio-total').textContent = `$${totalValue.toFixed(2)}`;
+        
+        const changeElement = document.getElementById('portfolio-change');
+        changeElement.textContent = `${totalChange >= 0 ? '+' : ''}$${totalChange.toFixed(2)}`;
+        changeElement.className = `text-xl font-bold ${totalChange >= 0 ? 'text-green-600' : 'text-red-600'}`;
+        
+        document.getElementById('portfolio-assets').textContent = assetsCount;
+    }
+    
+    // Удаление из портфеля
+    removeFromPortfolio(index) {
+        this.portfolio.splice(index, 1);
+        this.savePortfolio();
+        this.renderPortfolio();
+        this.showNotification('Актив удален из портфеля', 'info');
+    }
+    
+    // Закрытие портфеля
+    closePortfolio() {
+        document.getElementById('portfolio-modal').classList.add('hidden');
+    }
+    
+    // Сохранение портфеля
+    savePortfolio() {
+        localStorage.setItem('portfolio', JSON.stringify(this.portfolio));
+    }
+    
+    // Загрузка портфеля
+    loadPortfolio() {
+        try {
+            return JSON.parse(localStorage.getItem('portfolio')) || [];
+        } catch {
+            return [];
+        }
+    }
+    
+    // Экспорт данных
+    exportData() {
+        const data = {
+            currencies: this.currencies,
+            favorites: this.favorites,
+            portfolio: this.portfolio,
+            exportDate: new Date().toISOString()
+        };
+        
+        const jsonData = JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonData], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `currency-dashboard-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        this.showNotification('Данные экспортированы', 'success');
+    }
+    
+    // Переключение звука
+    toggleSound() {
+        this.soundEnabled = !this.soundEnabled;
+        localStorage.setItem('soundEnabled', this.soundEnabled);
+        
+        const button = document.getElementById('sound-toggle');
+        const icon = document.getElementById('sound-icon');
+        
+        if (this.soundEnabled) {
+            button.classList.remove('muted');
+            icon.className = 'fas fa-volume-up';
+        } else {
+            button.classList.add('muted');
+            icon.className = 'fas fa-volume-mute';
+        }
+        
+        this.showNotification(
+            this.soundEnabled ? 'Звук включен' : 'Звук выключен', 
+            'info'
+        );
+    }
+    
+    // Показ уведомления
+    showNotification(message, type = 'info') {
+        const container = document.getElementById('notifications');
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} mr-2"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        container.appendChild(notification);
+        
+        // Показываем уведомление
+        setTimeout(() => notification.classList.add('show'), 100);
+        
+        // Воспроизводим звук
+        if (this.soundEnabled) {
+            this.playNotificationSound(type);
+        }
+        
+        // Удаляем уведомление через 4 секунды
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 4000);
+    }
+    
+    // Воспроизведение звука уведомления
+    playNotificationSound(type) {
+        // Создаем простые звуки с помощью Web Audio API
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        // Разные частоты для разных типов уведомлений
+        const frequencies = {
+            success: [523, 659, 783], // C, E, G
+            error: [400, 300], // Низкие частоты
+            info: [523, 659] // C, E
+        };
+        
+        const freqs = frequencies[type] || frequencies.info;
+        let time = audioContext.currentTime;
+        
+        freqs.forEach((freq, index) => {
+            oscillator.frequency.setValueAtTime(freq, time);
+            gainNode.gain.setValueAtTime(0.1, time);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+            time += 0.15;
+        });
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(time);
+    }
+    
+    // Проверка ценовых алертов
+    checkPriceAlerts() {
+        this.currencies.forEach(currency => {
+            const lastPrice = this.lastPrices[currency.id];
+            if (lastPrice && Math.abs(currency.change24h) > 10) {
+                // Уведомление о значительном изменении цены
+                this.showNotification(
+                    `${currency.name}: ${currency.change24h > 0 ? '+' : ''}${currency.change24h.toFixed(2)}%`,
+                    currency.change24h > 0 ? 'success' : 'error'
+                );
+            }
+            this.lastPrices[currency.id] = currency.price;
+        });
+    }
+    
+    // Загрузка ценовых алертов
+    loadPriceAlerts() {
+        try {
+            return JSON.parse(localStorage.getItem('priceAlerts')) || [];
+        } catch {
+            return [];
+        }
+    }
+    
+    // Анимация иконки синхронизации
+    animateSync() {
+        const syncIcon = document.getElementById('sync-icon');
+        syncIcon.classList.add('sync-spin');
+        setTimeout(() => {
+            syncIcon.classList.remove('sync-spin');
+        }, 1000);
     }
 }
 

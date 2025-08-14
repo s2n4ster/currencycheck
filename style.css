@@ -365,3 +365,246 @@
 .chart-fade-in {
     opacity: 1;
 }
+
+/* Стили для поиска */
+#search-input:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Стили для уведомлений */
+.notification {
+    min-width: 300px;
+    max-width: 400px;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    transform: translateX(100%);
+    transition: all 0.3s ease;
+    border-left: 4px solid;
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification.success {
+    background-color: #d1fae5;
+    color: #065f46;
+    border-left-color: #10b981;
+}
+
+.notification.error {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border-left-color: #ef4444;
+}
+
+.notification.info {
+    background-color: #dbeafe;
+    color: #1e40af;
+    border-left-color: #3b82f6;
+}
+
+.dark .notification.success {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #34d399;
+}
+
+.dark .notification.error {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+}
+
+.dark .notification.info {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #60a5fa;
+}
+
+/* Стили для статистики */
+.stat-card {
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.dark .stat-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Анимация для иконки синхронизации */
+.sync-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Стили для портфеля */
+.portfolio-item {
+    transition: all 0.3s ease;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    background-color: #ffffff;
+}
+
+.dark .portfolio-item {
+    border-color: #4b5563;
+    background-color: #1f2937;
+}
+
+.portfolio-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dark .portfolio-item:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Стили для калькулятора */
+.calculator-swap {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.calculator-swap:hover {
+    transform: rotate(180deg);
+    color: #3b82f6;
+}
+
+/* Стили для звуковой кнопки */
+#sound-toggle {
+    transition: all 0.3s ease;
+}
+
+#sound-toggle:hover {
+    transform: scale(1.1);
+}
+
+#sound-toggle.muted {
+    background-color: #6b7280;
+}
+
+#sound-toggle.muted:hover {
+    background-color: #4b5563;
+}
+
+/* Стили для экспорта данных */
+.export-format {
+    padding: 0.75rem 1rem;
+    border: 2px solid transparent;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.export-format:hover {
+    border-color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.05);
+}
+
+.export-format.selected {
+    border-color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.dark .export-format:hover {
+    background-color: rgba(59, 130, 246, 0.1);
+}
+
+.dark .export-format.selected {
+    background-color: rgba(59, 130, 246, 0.2);
+}
+
+/* Стили для анимации появления элементов */
+.slide-up {
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Стили для прогресс бара */
+.progress-bar {
+    height: 4px;
+    background-color: #e5e7eb;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.dark .progress-bar {
+    background-color: #374151;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #10b981);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+/* Стили для тултипов */
+.tooltip {
+    position: relative;
+}
+
+.tooltip::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #1f2937;
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    z-index: 1000;
+}
+
+.tooltip:hover::before {
+    opacity: 1;
+    visibility: visible;
+    bottom: calc(100% + 5px);
+}
+
+/* Адаптивные улучшения для новых элементов */
+@media (max-width: 768px) {
+    .notification {
+        min-width: auto;
+        margin: 0 1rem;
+    }
+    
+    #sound-toggle {
+        bottom: 1rem;
+        right: 1rem;
+    }
+    
+    .stat-card {
+        padding: 0.75rem;
+    }
+}
