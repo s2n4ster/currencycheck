@@ -28,22 +28,80 @@ class CurrencyDashboard {
         this.priceAlerts = this.loadPriceAlerts();
         this.lastPrices = {};
         
-        // Список отслеживаемых валют и криптовалют
+        // Кеширование для оптимизации
+        this.cache = {
+            crypto: { data: null, timestamp: 0, duration: 30000 }, // 30 секунд
+            fiat: { data: null, timestamp: 0, duration: 300000 }   // 5 минут
+        };
+        
+        // Список отслеживаемых валют и криптовалют (расширенный)
         this.currencyList = [
-            // Криптовалюты
-            { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', type: 'crypto' },
-            { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', type: 'crypto' },
-            { id: 'binancecoin', name: 'BNB', symbol: 'BNB', type: 'crypto' },
-            { id: 'cardano', name: 'Cardano', symbol: 'ADA', type: 'crypto' },
-            { id: 'solana', name: 'Solana', symbol: 'SOL', type: 'crypto' },
-            { id: 'polkadot', name: 'Polkadot', symbol: 'DOT', type: 'crypto' },
+            // Топ криптовалюты
+            { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', type: 'crypto', priority: 1 },
+            { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', type: 'crypto', priority: 1 },
+            { id: 'tether', name: 'Tether', symbol: 'USDT', type: 'crypto', priority: 1 },
+            { id: 'binancecoin', name: 'BNB', symbol: 'BNB', type: 'crypto', priority: 1 },
+            { id: 'solana', name: 'Solana', symbol: 'SOL', type: 'crypto', priority: 1 },
+            { id: 'usd-coin', name: 'USD Coin', symbol: 'USDC', type: 'crypto', priority: 1 },
+            { id: 'cardano', name: 'Cardano', symbol: 'ADA', type: 'crypto', priority: 1 },
+            { id: 'avalanche-2', name: 'Avalanche', symbol: 'AVAX', type: 'crypto', priority: 1 },
+            { id: 'dogecoin', name: 'Dogecoin', symbol: 'DOGE', type: 'crypto', priority: 1 },
+            { id: 'polkadot', name: 'Polkadot', symbol: 'DOT', type: 'crypto', priority: 1 },
+            
+            // Популярные альткоины
+            { id: 'chainlink', name: 'Chainlink', symbol: 'LINK', type: 'crypto', priority: 2 },
+            { id: 'polygon', name: 'Polygon', symbol: 'MATIC', type: 'crypto', priority: 2 },
+            { id: 'litecoin', name: 'Litecoin', symbol: 'LTC', type: 'crypto', priority: 2 },
+            { id: 'shiba-inu', name: 'Shiba Inu', symbol: 'SHIB', type: 'crypto', priority: 2 },
+            { id: 'uniswap', name: 'Uniswap', symbol: 'UNI', type: 'crypto', priority: 2 },
+            { id: 'ethereum-classic', name: 'Ethereum Classic', symbol: 'ETC', type: 'crypto', priority: 2 },
+            { id: 'stellar', name: 'Stellar', symbol: 'XLM', type: 'crypto', priority: 2 },
+            { id: 'cosmos', name: 'Cosmos', symbol: 'ATOM', type: 'crypto', priority: 2 },
+            { id: 'algorand', name: 'Algorand', symbol: 'ALGO', type: 'crypto', priority: 2 },
+            { id: 'vechain', name: 'VeChain', symbol: 'VET', type: 'crypto', priority: 2 },
+            
+            // DeFi токены
+            { id: 'aave', name: 'Aave', symbol: 'AAVE', type: 'crypto', priority: 3 },
+            { id: 'compound-governance-token', name: 'Compound', symbol: 'COMP', type: 'crypto', priority: 3 },
+            { id: 'sushiswap', name: 'SushiSwap', symbol: 'SUSHI', type: 'crypto', priority: 3 },
+            { id: 'yearn-finance', name: 'Yearn Finance', symbol: 'YFI', type: 'crypto', priority: 3 },
+            { id: 'pancakeswap-token', name: 'PancakeSwap', symbol: 'CAKE', type: 'crypto', priority: 3 },
+            { id: 'curve-dao-token', name: 'Curve DAO', symbol: 'CRV', type: 'crypto', priority: 3 },
+            
+            // Метавселенная и NFT
+            { id: 'decentraland', name: 'Decentraland', symbol: 'MANA', type: 'crypto', priority: 3 },
+            { id: 'the-sandbox', name: 'The Sandbox', symbol: 'SAND', type: 'crypto', priority: 3 },
+            { id: 'axie-infinity', name: 'Axie Infinity', symbol: 'AXS', type: 'crypto', priority: 3 },
+            { id: 'enjincoin', name: 'Enjin Coin', symbol: 'ENJ', type: 'crypto', priority: 3 },
+            
+            // Новые перспективные проекты
+            { id: 'aptos', name: 'Aptos', symbol: 'APT', type: 'crypto', priority: 3 },
+            { id: 'sui', name: 'Sui', symbol: 'SUI', type: 'crypto', priority: 3 },
+            { id: 'arbitrum', name: 'Arbitrum', symbol: 'ARB', type: 'crypto', priority: 3 },
+            { id: 'optimism', name: 'Optimism', symbol: 'OP', type: 'crypto', priority: 3 },
+            { id: 'immutable-x', name: 'Immutable X', symbol: 'IMX', type: 'crypto', priority: 3 },
+            
+            // Мемкоины
+            { id: 'pepe', name: 'Pepe', symbol: 'PEPE', type: 'crypto', priority: 4 },
+            { id: 'bonk', name: 'Bonk', symbol: 'BONK', type: 'crypto', priority: 4 },
+            { id: 'floki', name: 'FLOKI', symbol: 'FLOKI', type: 'crypto', priority: 4 },
+            
+            // Стейблкоины
+            { id: 'dai', name: 'Dai', symbol: 'DAI', type: 'crypto', priority: 2 },
+            { id: 'true-usd', name: 'TrueUSD', symbol: 'TUSD', type: 'crypto', priority: 4 },
+            { id: 'paxos-standard', name: 'Pax Dollar', symbol: 'USDP', type: 'crypto', priority: 4 },
+            
             // Фиатные валюты (относительно USD)
-            { id: 'EUR', name: 'Euro', symbol: 'EUR', type: 'fiat' },
-            { id: 'GBP', name: 'British Pound', symbol: 'GBP', type: 'fiat' },
-            { id: 'JPY', name: 'Japanese Yen', symbol: 'JPY', type: 'fiat' },
-            { id: 'RUB', name: 'Russian Ruble', symbol: 'RUB', type: 'fiat' },
-            { id: 'CNY', name: 'Chinese Yuan', symbol: 'CNY', type: 'fiat' },
-            { id: 'CAD', name: 'Canadian Dollar', symbol: 'CAD', type: 'fiat' }
+            { id: 'EUR', name: 'Euro', symbol: 'EUR', type: 'fiat', priority: 1 },
+            { id: 'GBP', name: 'British Pound', symbol: 'GBP', type: 'fiat', priority: 1 },
+            { id: 'JPY', name: 'Japanese Yen', symbol: 'JPY', type: 'fiat', priority: 1 },
+            { id: 'RUB', name: 'Russian Ruble', symbol: 'RUB', type: 'fiat', priority: 1 },
+            { id: 'CNY', name: 'Chinese Yuan', symbol: 'CNY', type: 'fiat', priority: 1 },
+            { id: 'CAD', name: 'Canadian Dollar', symbol: 'CAD', type: 'fiat', priority: 1 },
+            { id: 'AUD', name: 'Australian Dollar', symbol: 'AUD', type: 'fiat', priority: 2 },
+            { id: 'CHF', name: 'Swiss Franc', symbol: 'CHF', type: 'fiat', priority: 2 },
+            { id: 'INR', name: 'Indian Rupee', symbol: 'INR', type: 'fiat', priority: 2 },
+            { id: 'KRW', name: 'South Korean Won', symbol: 'KRW', type: 'fiat', priority: 2 }
         ];
         
         this.init();
@@ -103,12 +161,21 @@ class CurrencyDashboard {
             }
         });
         
-        // Поиск валют
+        // Оптимизированный поиск валют с debouncing
         document.getElementById('search-input').addEventListener('input', (e) => {
             clearTimeout(this.searchTimeout);
+            const query = e.target.value.trim();
+            
+            // Мгновенный показ всех валют при очистке поиска
+            if (!query) {
+                this.renderCurrencies();
+                return;
+            }
+            
+            // Debounced поиск для остальных случаев
             this.searchTimeout = setTimeout(() => {
-                this.searchCurrencies(e.target.value);
-            }, 300);
+                this.searchCurrencies(query);
+            }, 250);
         });
         
         // Калькулятор
@@ -192,18 +259,27 @@ class CurrencyDashboard {
         }
     }
     
-    // Получение данных о валютах
+    // Оптимизированное получение данных о валютах с кешированием
     async fetchCurrencyData() {
         try {
             this.showLoading(true);
             this.hideError();
             this.animateSync();
             
-            // Получаем данные криптовалют и фиатных валют параллельно
-            const [cryptoData, fiatData] = await Promise.all([
-                this.fetchCryptoData(),
-                this.fetchFiatData()
-            ]);
+            // Проверяем кеш перед запросами
+            const now = Date.now();
+            let cryptoData, fiatData;
+            
+            const cryptoPromise = this.isCacheValid('crypto', now) 
+                ? Promise.resolve(this.cache.crypto.data) 
+                : this.fetchCryptoData();
+                
+            const fiatPromise = this.isCacheValid('fiat', now) 
+                ? Promise.resolve(this.cache.fiat.data) 
+                : this.fetchFiatData();
+            
+            // Получаем данные параллельно
+            [cryptoData, fiatData] = await Promise.all([cryptoPromise, fiatPromise]);
             
             this.currencies = [...cryptoData, ...fiatData];
             this.renderCurrencies();
@@ -211,10 +287,10 @@ class CurrencyDashboard {
             this.updateStatistics();
             this.checkPriceAlerts();
             
-            // Запускаем анимацию обновления карточек
+            // Запускаем анимацию обновления карточек (только для приоритетных)
             setTimeout(() => {
                 this.animateCardUpdates();
-            }, 500);
+            }, 300);
             
         } catch (error) {
             console.error('Ошибка при получении данных:', error);
@@ -224,27 +300,63 @@ class CurrencyDashboard {
         }
     }
     
-    // Получение данных криптовалют
+    // Проверка валидности кеша
+    isCacheValid(type, currentTime) {
+        const cache = this.cache[type];
+        return cache.data && (currentTime - cache.timestamp) < cache.duration;
+    }
+    
+    // Оптимизированное получение данных криптовалют с кешированием
     async fetchCryptoData() {
-        const cryptoIds = this.currencyList
-            .filter(c => c.type === 'crypto')
-            .map(c => c.id)
-            .join(',');
-            
-        const response = await fetch(
-            `${this.COINGECKO_API}/simple/price?ids=${cryptoIds}&vs_currencies=usd&include_24hr_change=true&include_last_updated_at=true`
-        );
+        // Разделяем на приоритетные и обычные для оптимизации запросов
+        const priorityCryptos = this.currencyList.filter(c => c.type === 'crypto' && c.priority <= 2);
+        const otherCryptos = this.currencyList.filter(c => c.type === 'crypto' && c.priority > 2);
         
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        // Сначала загружаем приоритетные валюты
+        const priorityIds = priorityCryptos.map(c => c.id).join(',');
+        const otherIds = otherCryptos.map(c => c.id).join(',');
+        
+        let priorityData = {};
+        let otherData = {};
+        
+        // Загружаем приоритетные валюты
+        if (priorityIds) {
+            const response = await fetch(
+                `${this.COINGECKO_API}/simple/price?ids=${priorityIds}&vs_currencies=usd&include_24hr_change=true&include_last_updated_at=true`
+            );
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            priorityData = await response.json();
         }
         
-        const data = await response.json();
+        // Загружаем остальные валюты с задержкой для уменьшения нагрузки
+        if (otherIds) {
+            setTimeout(async () => {
+                try {
+                    const response = await fetch(
+                        `${this.COINGECKO_API}/simple/price?ids=${otherIds}&vs_currencies=usd&include_24hr_change=true&include_last_updated_at=true`
+                    );
+                    
+                    if (response.ok) {
+                        otherData = await response.json();
+                        // Обновляем кеш для остальных валют
+                        this.updatePartialCryptoData(otherData, otherCryptos);
+                    }
+                } catch (error) {
+                    console.warn('Ошибка при загрузке дополнительных криптовалют:', error);
+                }
+            }, 500);
+        }
         
-        return this.currencyList
+        const allData = { ...priorityData, ...otherData };
+        
+        const result = this.currencyList
             .filter(c => c.type === 'crypto')
             .map(currency => {
-                const priceData = data[currency.id];
+                const priceData = allData[currency.id];
                 return {
                     ...currency,
                     price: priceData?.usd || 0,
@@ -252,9 +364,41 @@ class CurrencyDashboard {
                     lastUpdated: priceData?.last_updated_at || Date.now() / 1000
                 };
             });
+        
+        // Кешируем результат
+        this.cache.crypto = {
+            data: result,
+            timestamp: Date.now(),
+            duration: 30000
+        };
+        
+        return result;
     }
     
-    // Получение данных фиатных валют
+    // Частичное обновление данных криптовалют
+    updatePartialCryptoData(newData, currencies) {
+        if (!this.currencies) return;
+        
+        currencies.forEach(currency => {
+            const priceData = newData[currency.id];
+            if (priceData) {
+                const existingIndex = this.currencies.findIndex(c => c.id === currency.id);
+                if (existingIndex !== -1) {
+                    this.currencies[existingIndex] = {
+                        ...this.currencies[existingIndex],
+                        price: priceData.usd || 0,
+                        change24h: priceData.usd_24h_change || 0,
+                        lastUpdated: priceData.last_updated_at || Date.now() / 1000
+                    };
+                }
+            }
+        });
+        
+        // Мягкое обновление отображения
+        this.softUpdateCurrencyCards();
+    }
+    
+    // Оптимизированное получение данных фиатных валют с кешированием
     async fetchFiatData() {
         const response = await fetch(this.EXCHANGE_API);
         
@@ -268,7 +412,7 @@ class CurrencyDashboard {
             throw new Error('API error: ' + (data.error?.info || 'Unknown error'));
         }
         
-        return this.currencyList
+        const result = this.currencyList
             .filter(c => c.type === 'fiat')
             .map(currency => {
                 const rate = data.rates[currency.id];
@@ -279,6 +423,44 @@ class CurrencyDashboard {
                     lastUpdated: new Date(data.date).getTime() / 1000
                 };
             });
+        
+        // Кешируем результат (фиатные валюты обновляются реже)
+        this.cache.fiat = {
+            data: result,
+            timestamp: Date.now(),
+            duration: 300000 // 5 минут
+        };
+        
+        return result;
+    }
+    
+    // Мягкое обновление карточек валют без полной перерисовки
+    softUpdateCurrencyCards() {
+        if (!this.currencies) return;
+        
+        this.currencies.forEach(currency => {
+            const cardElement = document.querySelector(`[data-currency-id="${currency.id}"]`);
+            if (cardElement) {
+                const priceElement = cardElement.querySelector('.currency-price');
+                const changeElement = cardElement.querySelector('.currency-change');
+                
+                if (priceElement) {
+                    priceElement.textContent = currency.type === 'crypto' 
+                        ? this.formatPrice(currency.price)
+                        : currency.price.toFixed(4);
+                }
+                
+                if (changeElement && currency.change24h !== 0) {
+                    const isPositive = currency.change24h > 0;
+                    changeElement.textContent = `${isPositive ? '+' : ''}${currency.change24h.toFixed(2)}%`;
+                    changeElement.className = `currency-change text-sm ${isPositive ? 'text-green-600' : 'text-red-600'}`;
+                }
+                
+                // Добавляем эффект обновления
+                cardElement.classList.add('pulse-update');
+                setTimeout(() => cardElement.classList.remove('pulse-update'), 600);
+            }
+        });
     }
     
     // Отображение валют
@@ -298,16 +480,96 @@ class CurrencyDashboard {
             return;
         }
         
-        grid.innerHTML = filteredCurrencies.map(currency => this.createCurrencyCard(currency)).join('');
+        // Сортируем по приоритету для лучшей производительности
+        const sortedCurrencies = filteredCurrencies.sort((a, b) => {
+            if (a.priority !== b.priority) {
+                return a.priority - b.priority;
+            }
+            return b.price - a.price; // По убыванию цены внутри одного приоритета
+        });
         
-        // Добавляем анимацию появления
-        setTimeout(() => {
-            grid.querySelectorAll('.currency-card').forEach((card, index) => {
+        // Используем DocumentFragment для оптимизации DOM операций
+        const fragment = document.createDocumentFragment();
+        
+        // Рендерим приоритетные валюты сначала (priority 1-2)
+        const priorityCurrencies = sortedCurrencies.filter(c => c.priority <= 2);
+        const otherCurrencies = sortedCurrencies.filter(c => c.priority > 2);
+        
+        // Рендерим приоритетные валюты немедленно
+        priorityCurrencies.forEach(currency => {
+            const cardElement = document.createElement('div');
+            cardElement.innerHTML = this.createCurrencyCard(currency);
+            fragment.appendChild(cardElement.firstElementChild);
+        });
+        
+        // Очищаем и добавляем приоритетные валюты
+        grid.innerHTML = '';
+        grid.appendChild(fragment);
+        
+        // Ленивая загрузка остальных валют
+        if (otherCurrencies.length > 0) {
+            setTimeout(() => {
+                this.renderRemainingCurrencies(otherCurrencies, grid);
+            }, 100);
+        }
+        
+        // Оптимизированная анимация появления
+        this.animateCardAppearance(grid);
+    }
+    
+    // Рендеринг оставшихся валют с ленивой загрузкой
+    renderRemainingCurrencies(currencies, grid) {
+        const batchSize = 8; // Рендерим по 8 карточек за раз
+        let currentIndex = 0;
+        
+        const renderBatch = () => {
+            const batch = currencies.slice(currentIndex, currentIndex + batchSize);
+            const fragment = document.createDocumentFragment();
+            
+            batch.forEach(currency => {
+                const cardElement = document.createElement('div');
+                cardElement.innerHTML = this.createCurrencyCard(currency);
+                const card = cardElement.firstElementChild;
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                fragment.appendChild(card);
+            });
+            
+            grid.appendChild(fragment);
+            
+            // Анимируем появление новой порции
+            setTimeout(() => {
+                const newCards = Array.from(grid.children).slice(-batch.length);
+                newCards.forEach((card, index) => {
+                    setTimeout(() => {
+                        card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, index * 40);
+                });
+            }, 50);
+            
+            currentIndex += batchSize;
+            
+            // Продолжаем рендерить, если есть еще валюты
+            if (currentIndex < currencies.length) {
+                setTimeout(renderBatch, 150);
+            }
+        };
+        
+        renderBatch();
+    }
+    
+    // Оптимизированная анимация появления карточек
+    animateCardAppearance(grid) {
+        const cards = grid.querySelectorAll('.currency-card');
+        cards.forEach((card, index) => {
+            if (index < 16) { // Анимируем только первые 16 карточек
                 setTimeout(() => {
                     card.classList.add('fade-in');
-                }, index * 50);
-            });
-        }, 50);
+                }, index * 30);
+            }
+        });
     }
     
     // Создание карточки валюты
@@ -317,7 +579,7 @@ class CurrencyDashboard {
         const priceChangeIcon = currency.change24h > 0 ? 'fa-arrow-up' : currency.change24h < 0 ? 'fa-arrow-down' : 'fa-minus';
         
         return `
-            <div class="currency-card bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
+            <div class="currency-card bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700" data-currency-id="${currency.id}">
                 <div class="flex justify-between items-start mb-4">
                     <div class="flex items-center">
                         <div class="w-10 h-10 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold mr-3">
@@ -337,12 +599,12 @@ class CurrencyDashboard {
                 
                 <div class="mb-4">
                     <div class="currency-price text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                        $${this.formatPrice(currency.price)}
+                        ${currency.type === 'crypto' ? '$' + this.formatPrice(currency.price) : currency.price.toFixed(4)}
                     </div>
                     ${currency.change24h !== 0 ? `
-                        <div class="flex items-center ${priceChangeClass} px-2 py-1 rounded-full text-sm font-medium">
+                        <div class="currency-change flex items-center ${priceChangeClass} px-2 py-1 rounded-full text-sm font-medium">
                             <i class="fas ${priceChangeIcon} mr-1"></i>
-                            ${Math.abs(currency.change24h).toFixed(2)}%
+                            ${(currency.change24h > 0 ? '+' : '')}${currency.change24h.toFixed(2)}%
                         </div>
                     ` : ''}
                 </div>
@@ -1484,6 +1746,9 @@ class TabManager {
     loadNewsData() {
         const newsGrid = document.getElementById('news-grid');
         if (!newsGrid) return;
+        
+        // Проверяем, загружены ли уже новости
+        if (newsGrid.children.length > 0) return;
 
         // Simulated news data
         const newsItems = [

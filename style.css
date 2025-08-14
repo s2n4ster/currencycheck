@@ -964,6 +964,108 @@
     animation: pulse-glow 2s ease-in-out infinite;
 }
 
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+
+/* GPU-accelerated animations */
+.currency-card,
+.tab-btn,
+.news-filter,
+.gradient-card-hover {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* Optimized fade-in animation */
+@keyframes optimized-fade-in {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 10px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+.fade-in {
+    animation: optimized-fade-in 0.3s ease-out forwards;
+}
+
+/* Performance optimized pulse */
+@keyframes fast-pulse {
+    0% {
+        transform: scale3d(1, 1, 1);
+    }
+    50% {
+        transform: scale3d(1.02, 1.02, 1);
+    }
+    100% {
+        transform: scale3d(1, 1, 1);
+    }
+}
+
+.pulse-update {
+    animation: fast-pulse 0.6s ease-in-out;
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    
+    .tab-slide-in,
+    .tab-slide-out,
+    .fade-in,
+    .pulse-update {
+        animation: none !important;
+    }
+}
+
+/* Container queries for better responsiveness */
+@container (max-width: 768px) {
+    .currency-card {
+        padding: 1rem;
+    }
+    
+    .tab-btn span {
+        display: none;
+    }
+}
+
+/* Optimize scrolling performance */
+.scrollbar-hide {
+    -webkit-overflow-scrolling: touch;
+    overflow-scrolling: touch;
+}
+
+/* Lazy loading placeholder */
+.currency-card.loading {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.dark .currency-card.loading {
+    background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+    background-size: 200% 100%;
+}
+
 /* Адаптивные улучшения для новых элементов */
 @media (max-width: 768px) {
     .notification {
