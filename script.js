@@ -124,7 +124,9 @@ class CurrencyDashboard {
         
         // Загружаем новости при инициализации
         setTimeout(() => {
-            this.loadNewsData();
+            if (window.tabManager) {
+                window.tabManager.loadNewsData();
+            }
         }, 1000); // Небольшая задержка для загрузки основного интерфейса
         
         console.log('Currency Dashboard initialized successfully');
@@ -224,8 +226,10 @@ class CurrencyDashboard {
         
         // Обновление новостей
         document.getElementById('refresh-news').addEventListener('click', () => {
-            this.loadNewsData(true); // Принудительное обновление
-            this.showNotification('Новости обновляются...', 'info');
+            if (window.tabManager) {
+                window.tabManager.loadNewsData(true); // Принудительное обновление
+                this.showNotification('Новости обновляются...', 'info');
+            }
         });
         
         // Калькулятор - обновление при изменении значений
@@ -1100,7 +1104,9 @@ class CurrencyDashboard {
     // Запуск автообновления новостей
     startNewsAutoUpdate() {
         this.newsUpdateInterval = setInterval(() => {
-            this.loadNewsData(true); // Принудительное обновление
+            if (window.tabManager) {
+                window.tabManager.loadNewsData(true); // Принудительное обновление
+            }
         }, this.NEWS_UPDATE_INTERVAL);
     }
     
@@ -1670,7 +1676,9 @@ document.addEventListener('visibilitychange', () => {
         } else {
             window.dashboard.startAutoUpdate();
             window.dashboard.fetchCurrencyData(); // Обновляем данные при возвращении на страницу
-            window.dashboard.loadNewsData(true); // Обновляем новости при возвращении на страницу
+            if (window.tabManager) {
+                window.tabManager.loadNewsData(true); // Обновляем новости при возвращении на страницу
+            }
         }
     }
 });
@@ -1682,6 +1690,7 @@ class TabManager {
         this.tabButtons = document.querySelectorAll('.tab-btn');
         this.tabContents = document.querySelectorAll('.tab-content');
         this.isAnimating = false;
+        this.dashboard = window.dashboard; // Ссылка на основной dashboard
         this.init();
     }
 
@@ -1822,9 +1831,9 @@ class TabManager {
         
         // Проверяем кеш новостей
         const now = Date.now();
-        if (!forceRefresh && this.cache.news.data && (now - this.cache.news.timestamp) < this.cache.news.duration) {
+        if (!forceRefresh && this.dashboard.cache.news.data && (now - this.dashboard.cache.news.timestamp) < this.dashboard.cache.news.duration) {
             console.log('Using cached news data');
-            this.renderNews(this.cache.news.data);
+            this.renderNews(this.dashboard.cache.news.data);
             return;
         }
 
@@ -1836,10 +1845,10 @@ class TabManager {
             console.log('Fetching news from API...');
             const newsData = await this.fetchNewsFromAPI();
             console.log('News data received:', newsData.length, 'items');
-            this.cache.news = {
+            this.dashboard.cache.news = {
                 data: newsData,
                 timestamp: now,
-                duration: this.cache.news.duration
+                duration: this.dashboard.cache.news.duration
             };
             this.renderNews(newsData);
         } catch (error) {
@@ -1852,7 +1861,7 @@ class TabManager {
         const allNews = [];
         
         // Пытаемся получить новости из нескольких источников
-        for (const apiUrl of this.NEWS_API_URLS) {
+        for (const apiUrl of this.dashboard.NEWS_API_URLS) {
             try {
                 const response = await fetch(apiUrl);
                 if (!response.ok) continue;
@@ -2096,11 +2105,10 @@ class TabManager {
 }
 
 // Initialize tab manager when DOM is loaded
-let tabManager;
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        tabManager = new TabManager();
+        window.tabManager = new TabManager();
     });
 } else {
-    tabManager = new TabManager();
+    window.tabManager = new TabManager();
 }
