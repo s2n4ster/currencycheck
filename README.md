@@ -23,7 +23,7 @@
 ## 📡 API
 
 - [CoinGecko API](https://www.coingecko.com/api) - данные о криптовалютах
-- [ExchangeRate API](https://exchangerate.host/) - курсы фиатных валют
+- [FX Rates API](https://fxratesapi.com/) - курсы фиатных валют
 
 ## 🛠 Установка и запуск
 

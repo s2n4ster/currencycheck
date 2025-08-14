@@ -12,7 +12,7 @@ class CurrencyDashboard {
         // Конфигурация
         this.UPDATE_INTERVAL = 15000; // 15 секунд
         this.COINGECKO_API = 'https://api.coingecko.com/api/v3';
-        this.EXCHANGE_API = 'https://api.exchangerate.host/latest';
+        this.EXCHANGE_API = 'https://api.fxratesapi.com/latest';
         
         // Состояние приложения
         this.currencies = [];
@@ -174,13 +174,17 @@ class CurrencyDashboard {
     
     // Получение данных фиатных валют
     async fetchFiatData() {
-        const response = await fetch(`${this.EXCHANGE_API}?base=USD`);
+        const response = await fetch(this.EXCHANGE_API);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error('API error: ' + (data.error?.info || 'Unknown error'));
+        }
         
         return this.currencyList
             .filter(c => c.type === 'fiat')
