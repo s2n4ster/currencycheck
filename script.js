@@ -1639,6 +1639,7 @@ class TabManager {
         this.currentTab = 'market';
         this.tabButtons = document.querySelectorAll('.tab-btn');
         this.tabContents = document.querySelectorAll('.tab-content');
+        this.isAnimating = false;
         this.init();
     }
 
@@ -1664,17 +1665,14 @@ class TabManager {
     switchTab(tabId) {
         if (this.currentTab === tabId) return;
 
-        // Add slide out animation to current tab
-        const currentTabContent = document.getElementById(`${this.currentTab}-tab`);
-        if (currentTabContent) {
-            currentTabContent.classList.add('tab-slide-out');
-            
-            setTimeout(() => {
-                currentTabContent.classList.remove('active', 'tab-slide-out');
-            }, 300);
-        }
+        // Prevent multiple clicks during animation
+        if (this.isAnimating) return;
+        this.isAnimating = true;
 
-        // Update tab buttons
+        const currentTabContent = document.getElementById(`${this.currentTab}-tab`);
+        const newTabContent = document.getElementById(`${tabId}-tab`);
+
+        // Update tab buttons immediately for responsive feel
         this.tabButtons.forEach(btn => {
             btn.classList.remove('active');
             if (btn.dataset.tab === tabId) {
@@ -1682,22 +1680,51 @@ class TabManager {
             }
         });
 
-        // Show new tab content with animation
-        setTimeout(() => {
-            const newTabContent = document.getElementById(`${tabId}-tab`);
-            if (newTabContent) {
-                newTabContent.classList.add('active', 'tab-slide-in');
+        // Clean up any existing animation classes
+        if (currentTabContent) {
+            currentTabContent.classList.remove('tab-slide-in', 'tab-fade-in');
+        }
+        if (newTabContent) {
+            newTabContent.classList.remove('tab-slide-out', 'tab-fade-out');
+        }
+
+        // Use requestAnimationFrame for smoother animations
+        requestAnimationFrame(() => {
+            // Hide current tab with fade-out
+            if (currentTabContent) {
+                currentTabContent.classList.add('tab-fade-out');
                 
+                // Remove after animation completes
                 setTimeout(() => {
-                    newTabContent.classList.remove('tab-slide-in');
-                }, 500);
+                    currentTabContent.classList.remove('active', 'tab-fade-out');
+                }, 300);
             }
-        }, 300);
+
+            // Show new tab with slight delay for smooth transition
+            setTimeout(() => {
+                if (newTabContent) {
+                    newTabContent.classList.add('active');
+                    
+                    // Use requestAnimationFrame to ensure display change is processed
+                    requestAnimationFrame(() => {
+                        newTabContent.classList.add('tab-fade-in');
+                        
+                        // Clean up animation class
+                        setTimeout(() => {
+                            newTabContent.classList.remove('tab-fade-in');
+                            this.isAnimating = false;
+                        }, 400);
+                    });
+                }
+            }, 150);
+        });
 
         this.currentTab = tabId;
 
-        // Load tab-specific data
-        this.loadTabData(tabId);
+        // Load tab-specific data with delay to avoid layout thrashing
+        setTimeout(() => {
+            this.loadTabData(tabId);
+        }, 200);
     }
 
     loadTabData(tabId) {
