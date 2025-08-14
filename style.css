@@ -6,19 +6,85 @@
  * @version 1.0.0
  */
 
-/* Плавные анимации для карточек валют */
+/* Улучшенные анимации для карточек валют */
 .currency-card {
-    transition: all 0.3s ease;
-    transform: translateY(0);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(0) scale(1);
+    position: relative;
+    overflow: hidden;
+}
+
+.currency-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s;
+    z-index: 1;
+}
+
+.currency-card:hover::before {
+    left: 100%;
 }
 
 .currency-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15), 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
 }
 
 .dark .currency-card:hover {
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4), 0 10px 20px -5px rgba(0, 0, 0, 0.2);
+    border-color: rgba(59, 130, 246, 0.5);
+}
+
+/* Анимация обновления карточки */
+.currency-card.updating {
+    animation: cardUpdate 1s ease-in-out;
+    position: relative;
+}
+
+.currency-card.updating::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(59, 130, 246, 0.1) 50%, transparent 70%);
+    animation: updateSweep 1s ease-in-out;
+    z-index: 1;
+    pointer-events: none;
+}
+
+@keyframes cardUpdate {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes updateSweep {
+    0% {
+        transform: translateX(-100%) skewX(-20deg);
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(100%) skewX(-20deg);
+        opacity: 0;
+    }
 }
 
 /* Анимация пульсации для обновления данных */
@@ -420,32 +486,125 @@
     color: #60a5fa;
 }
 
-/* Стили для статистики */
+/* Улучшенные стили для статистики */
 .stat-card {
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 0deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+    opacity: 0;
+    transition: all 0.5s ease;
+    animation: statRotate 3s linear infinite;
+}
+
+.stat-card:hover::before {
+    opacity: 1;
 }
 
 .stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15), 0 6px 20px rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
 }
 
 .dark .stat-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 6px 20px rgba(59, 130, 246, 0.2);
 }
 
-/* Анимация для иконки синхронизации */
-.sync-spin {
-    animation: spin 1s linear infinite;
+.stat-card.updating {
+    animation: statPulse 0.8s ease-in-out;
 }
 
-@keyframes spin {
-    from {
+@keyframes statRotate {
+    0% {
         transform: rotate(0deg);
     }
-    to {
+    100% {
         transform: rotate(360deg);
     }
+}
+
+@keyframes statPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+    }
+}
+
+/* Улучшенная анимация синхронизации */
+.sync-spin {
+    animation: syncRotate 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+    transform-origin: center;
+}
+
+.sync-pulse {
+    animation: syncPulse 2s ease-in-out infinite;
+}
+
+.sync-ring-active {
+    opacity: 0.6 !important;
+    animation: syncRing 1.5s ease-out infinite;
+}
+
+@keyframes syncRotate {
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+    50% {
+        transform: rotate(180deg) scale(1.1);
+        color: #10b981;
+    }
+    100% {
+        transform: rotate(360deg) scale(1);
+    }
+}
+
+@keyframes syncPulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.05);
+    }
+}
+
+@keyframes syncRing {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+/* Анимация shimmer для прогресс-бара */
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.animate-shimmer {
+    animation: shimmer 2s infinite;
 }
 
 /* Стили для портфеля */

@@ -66,21 +66,21 @@
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <!-- Top Stats Bar -->
             <div class="mb-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                    <div class="text-sm text-gray-600 dark:text-gray-400">Общий объем</div>
-                    <div id="total-volume" class="text-lg font-bold text-gray-900 dark:text-white">$0</div>
+                <div class="stat-card bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                    <div class="text-sm text-gray-600 dark:text-gray-400 relative z-10">Общий объем</div>
+                    <div id="total-volume" class="text-lg font-bold text-gray-900 dark:text-white relative z-10">$0</div>
                 </div>
-                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                    <div class="text-sm text-gray-600 dark:text-gray-400">Топ растет</div>
-                    <div id="top-gainer" class="text-lg font-bold text-green-600">-</div>
+                <div class="stat-card bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                    <div class="text-sm text-gray-600 dark:text-gray-400 relative z-10">Топ растет</div>
+                    <div id="top-gainer" class="text-lg font-bold text-green-600 relative z-10">-</div>
                 </div>
-                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                    <div class="text-sm text-gray-600 dark:text-gray-400">Топ падает</div>
-                    <div id="top-loser" class="text-lg font-bold text-red-600">-</div>
+                <div class="stat-card bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                    <div class="text-sm text-gray-600 dark:text-gray-400 relative z-10">Топ падает</div>
+                    <div id="top-loser" class="text-lg font-bold text-red-600 relative z-10">-</div>
                 </div>
-                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                    <div class="text-sm text-gray-600 dark:text-gray-400">Активных валют</div>
-                    <div id="active-currencies" class="text-lg font-bold text-gray-900 dark:text-white">0</div>
+                <div class="stat-card bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                    <div class="text-sm text-gray-600 dark:text-gray-400 relative z-10">Активных валют</div>
+                    <div id="active-currencies" class="text-lg font-bold text-gray-900 dark:text-white relative z-10">0</div>
                 </div>
             </div>
 
@@ -103,7 +103,10 @@
                     <!-- Update Info -->
                     <div class="flex items-center gap-4">
                         <div class="flex items-center gap-2">
-                            <i class="fas fa-sync-alt text-primary-600" id="sync-icon"></i>
+                            <div class="relative">
+                                <i class="fas fa-sync-alt text-primary-600" id="sync-icon"></i>
+                                <div id="sync-ring" class="absolute inset-0 rounded-full border-2 border-primary-300 opacity-0 animate-ping"></div>
+                            </div>
                             <span class="text-sm text-gray-600 dark:text-gray-400">Обновление каждые 15 сек</span>
                         </div>
                         <div id="last-update" class="text-sm text-gray-500 dark:text-gray-400"></div>
@@ -136,7 +139,21 @@
 
             <!-- Loading Spinner -->
             <div id="loading" class="flex justify-center items-center py-12">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+                <div class="relative">
+                    <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-200 border-t-primary-600"></div>
+                    <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-primary-400 animate-spin" style="animation-duration: 0.75s; animation-direction: reverse;"></div>
+                </div>
+            </div>
+
+            <!-- Update Progress Bar -->
+            <div id="update-progress" class="hidden fixed top-0 left-0 right-0 z-50">
+                <div class="h-1 bg-gradient-to-r from-primary-500 via-primary-400 to-primary-500 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-pulse"></div>
+                    <div id="progress-fill" class="h-full bg-gradient-to-r from-primary-600 to-primary-400 transition-all duration-300 ease-out" style="width: 0%"></div>
+                    <div class="absolute inset-0">
+                        <div class="h-full w-full bg-gradient-to-r from-transparent via-primary-300 to-transparent opacity-50 animate-shimmer"></div>
+                    </div>
+                </div>
             </div>
 
             <!-- Error Message -->

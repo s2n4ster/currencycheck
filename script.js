@@ -211,6 +211,11 @@ class CurrencyDashboard {
             this.updateStatistics();
             this.checkPriceAlerts();
             
+            // Запускаем анимацию обновления карточек
+            setTimeout(() => {
+                this.animateCardUpdates();
+            }, 500);
+            
         } catch (error) {
             console.error('Ошибка при получении данных:', error);
             this.showError('Не удалось загрузить данные о валютах. Проверьте подключение к интернету.');
@@ -870,6 +875,9 @@ class CurrencyDashboard {
         
         // Количество активных валют
         document.getElementById('active-currencies').textContent = this.currencies.length;
+        
+        // Анимируем статистические карточки
+        this.animateStatCards();
     }
     
     // Форматирование больших чисел
@@ -1220,14 +1228,81 @@ class CurrencyDashboard {
         }
     }
     
-    // Анимация иконки синхронизации
+    // Улучшенная анимация синхронизации
     animateSync() {
         const syncIcon = document.getElementById('sync-icon');
+        const syncRing = document.getElementById('sync-ring');
+        
+        // Запускаем анимации
         syncIcon.classList.add('sync-spin');
+        syncRing.classList.add('sync-ring-active');
+        
+        // Показываем прогресс-бар
+        this.showUpdateProgress();
+        
+        // Убираем анимации
         setTimeout(() => {
             syncIcon.classList.remove('sync-spin');
-        }, 1000);
+            syncRing.classList.remove('sync-ring-active');
+        }, 1500);
     }
+    
+    // Показ прогресса обновления
+    showUpdateProgress() {
+        const progressContainer = document.getElementById('update-progress');
+        const progressFill = document.getElementById('progress-fill');
+        
+        progressContainer.classList.remove('hidden');
+        progressFill.style.width = '0%';
+        
+        // Имитируем прогресс загрузки
+        const steps = [10, 25, 45, 70, 85, 100];
+        let currentStep = 0;
+        
+        const updateProgress = () => {
+            if (currentStep < steps.length) {
+                progressFill.style.width = steps[currentStep] + '%';
+                currentStep++;
+                setTimeout(updateProgress, 200);
+            } else {
+                // Скрываем прогресс-бар
+                setTimeout(() => {
+                    progressContainer.classList.add('hidden');
+                    progressFill.style.width = '0%';
+                }, 300);
+            }
+        };
+        
+        updateProgress();
+    }
+    
+    // Анимация обновления карточек
+    animateCardUpdates() {
+        const cards = document.querySelectorAll('.currency-card');
+        
+        cards.forEach((card, index) => {
+            setTimeout(() => {
+                card.classList.add('updating');
+                setTimeout(() => {
+                    card.classList.remove('updating');
+                }, 1000);
+                         }, index * 100);
+         });
+     }
+     
+     // Анимация статистических карточек
+     animateStatCards() {
+         const statCards = document.querySelectorAll('.stat-card');
+         
+         statCards.forEach((card, index) => {
+             setTimeout(() => {
+                 card.classList.add('updating');
+                 setTimeout(() => {
+                     card.classList.remove('updating');
+                 }, 800);
+             }, index * 150);
+         });
+     }
 }
 
 // Инициализация приложения после загрузки DOM
